@@ -32,7 +32,7 @@ Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
             private ExternallyAuthenticatedAuthFilterFactory externallyAuthenticatedAuthFilterFactory;
 
             @Override
-            public ExternallyAuthenticatedAuthFilterFactory getExternallyAuthenticatedConfiguration()
+            public ExternallyAuthenticatedAuthFilterFactory getExternallyAuthenticatedFilterFactory()
             {
                 return externallyAuthenticatedAuthFilterFactory;
             }

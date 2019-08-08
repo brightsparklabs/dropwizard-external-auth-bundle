@@ -28,5 +28,5 @@ public interface ExternallyAuthenticatedAuthBundleConfiguration
     /**
      * @return configuration for trusting external authentication providers.
      */
-    ExternallyAuthenticatedAuthFilterFactory getExternallyAuthenticatedConfiguration();
+    ExternallyAuthenticatedAuthFilterFactory getExternallyAuthenticatedFilterFactory();
 }

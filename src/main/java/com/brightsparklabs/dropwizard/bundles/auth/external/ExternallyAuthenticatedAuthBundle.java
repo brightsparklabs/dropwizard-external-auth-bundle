@@ -69,7 +69,7 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
     public void run(final T configuration, final Environment environment) throws Exception
     {
         final ExternallyAuthenticatedAuthFilterFactory authFilterFactory
-                = configuration.getExternallyAuthenticatedConfiguration();
+                = configuration.getExternallyAuthenticatedFilterFactory();
         final AuthFilter<?, P> authFilter = authFilterFactory.build(externalUserToPrincipal);
 
         environment.jersey().register(new AuthDynamicFeature(authFilter));
