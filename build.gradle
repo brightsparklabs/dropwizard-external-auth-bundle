@@ -23,6 +23,10 @@ plugins {
     // Apply the annotation processing plugins
     id "net.ltgt.apt" version "0.21"
     id "net.ltgt.apt-idea" version "0.21"
+
+    // Apply bintray plugin for publishing artifacts
+    id "com.jfrog.bintray" version "1.8.4"
+    id "maven-publish"
 }
 
 sourceCompatibility = 1.8
@@ -127,5 +131,86 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 jacocoTestReport {
     reports {
         html.enabled = true
+    }
+}
+
+// -----------------------------------------------------------------------------
+// PUBLISH ARTIFACTS (via bintray)
+// -----------------------------------------------------------------------------
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    publications = ['Publication']
+    override = true
+    publish = true
+    pkg {
+        repo = 'maven'
+        name = project.name
+        userOrg = 'brightsparklabs'
+        licenses = ['MIT']
+        vcsUrl = project.ext.url
+        version {
+            name = project.version
+            vcsTag = project.version
+            released = new Date()
+        }
+    }
+}
+
+
+// Include javadoc and sources (requirements for publishing to Maven Central)
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+def pomConfig = {
+    name project.name
+    packaging 'jar'
+    description project.description
+    url project.url
+
+    scm {
+        connection project.scm
+        developerConnection project.scm
+        url project.scm
+    }
+
+    licenses {
+        license {
+            name 'MIT License'
+            url 'http://www.opensource.org/licenses/mit-license.php'
+        }
+    }
+
+    developers {
+        developer {
+            id 'brightsparklabs'
+            name 'brightSPARK Labs'
+            email 'enquire@brightsparklabs.com'
+        }
+    }
+}
+
+publishing {
+    publications {
+        Publication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId project.group
+            artifactId project.name
+            version project.version
+            pom.withXml {
+                def root = asNode()
+                root.children().last() + pomConfig
+            }
+        }
     }
 }
