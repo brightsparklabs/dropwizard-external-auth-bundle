@@ -5,29 +5,24 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
-import io.dropwizard.ConfiguredBundle;
-import io.dropwizard.auth.AuthDynamicFeature;
-import io.dropwizard.auth.AuthFilter;
-import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.auth.AuthenticationException;
+import io.dropwizard.auth.Authenticator;
 
 import java.security.Principal;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * Bundle to support authenticating users who have been already authenticated by an external
- * system.
+ * Authenticates a user based on information passed to it by an external authentication provider.
  *
- * @param <T>
- *         Type of configuration required to configure the bundle.
+ * @param <C>
+ *         Type of credentials the authenticator requires.
  * @param <P>
  *         Type of {@link Principal} to return for authenticated users.
  *
  * @author brightSPARK Labs
  */
-public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends ExternallyAuthenticatedAuthBundleConfiguration>
-        implements ConfiguredBundle<T>
+public abstract class ExternalAuthenticator<C, P extends Principal> implements Authenticator<C, P>
 {
     // -------------------------------------------------------------------------
     // CONSTANTS
@@ -41,45 +36,47 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
     // INSTANCE VARIABLES
     // -------------------------------------------------------------------------
 
-    /** Type of {@link Principal} to return for authenticated users */
-    private final Class<P> principalClazz;
-
-    /** Converts the internal user to the {@link Principal} used in the system */
+    /** Converts an internal user to the principal used in the system */
     private final Function<InternalUser, P> externalUserToPrincipal;
 
     // -------------------------------------------------------------------------
     // CONSTRUCTION
     // -------------------------------------------------------------------------
 
-    public ExternallyAuthenticatedAuthBundle(Class<P> principalClazz,
-            Function<InternalUser, P> converter)
+    /**
+     * Creates a new authenticator which validates JWTs using the specified public signing key. This
+     * should be the signing key of the Identity Provider who signed the JWT.
+     *
+     * @param externalUserToPrincipal
+     *         Converts the internal user to the {@link Principal} used in the system.
+     */
+    ExternalAuthenticator(final Function<InternalUser, P> externalUserToPrincipal)
     {
-        this.principalClazz = principalClazz;
-        this.externalUserToPrincipal = converter;
+        this.externalUserToPrincipal = externalUserToPrincipal;
+    }
+
+    // -------------------------------------------------------------------------
+    // IMPLEMENTATION:  Authenticator
+    // -------------------------------------------------------------------------
+
+    @Override
+    public Optional<P> authenticate(final C credentials) throws AuthenticationException
+    {
+        final Optional<InternalUser> user = doAuthenticate(credentials);
+        if (!user.isPresent())
+        {
+            return Optional.empty();
+        }
+        final P principal = externalUserToPrincipal.apply(user.get());
+        return Optional.of(principal);
     }
 
     // -------------------------------------------------------------------------
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
-    @Override
-    public void initialize(final Bootstrap<?> bootstrap) { }
-
-    @Override
-    public void run(final T configuration, final Environment environment) throws Exception
-    {
-        final ExternallyAuthenticatedAuthFilterFactory authFilterFactory
-                = configuration.getExternallyAuthenticatedConfiguration();
-        final AuthFilter<?, P> authFilter = authFilterFactory.build(externalUserToPrincipal);
-
-        environment.jersey().register(new AuthDynamicFeature(authFilter));
-        // Support using @Auth to inject a custom Principal type into resources
-        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(principalClazz));
-    }
-
-    // -------------------------------------------------------------------------
-    // PUBLIC METHODS
-    // -------------------------------------------------------------------------
+    public abstract Optional<InternalUser> doAuthenticate(final C credentials)
+            throws AuthenticationException;
 
     // -------------------------------------------------------------------------
     // PRIVATE METHODS

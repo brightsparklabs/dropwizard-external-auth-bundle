@@ -9,12 +9,13 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.auth.AuthenticationException;
-import io.dropwizard.auth.Authenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.MultivaluedMap;
+import java.security.Principal;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 /**
@@ -23,10 +24,13 @@ import java.util.stream.StreamSupport;
  * fields (and strips out any fields the end user provides in the request). Authenticator} for it to
  * determine if the user should be considered authenticated.
  *
+ * @param <P>
+ *         Type of {@link Principal} to return for authenticated users.
+ *
  * @author brightSPARK Labs
  */
-public class HeaderFieldsAuthenticator
-        implements Authenticator<MultivaluedMap<String, String>, ExternalUser>
+public class HeaderFieldsAuthenticator<P extends Principal>
+        extends ExternalAuthenticator<MultivaluedMap<String, String>, P>
 {
     // -------------------------------------------------------------------------
     // CONSTANTS
@@ -68,12 +72,23 @@ public class HeaderFieldsAuthenticator
     // CONSTRUCTION
     // -------------------------------------------------------------------------
 
+    /**
+     * Default constructor.
+     *
+     * @param externalUserToPrincipal
+     *         Converts the internal user to the {@link Principal} used in the system.
+     */
+    public HeaderFieldsAuthenticator(final Function<InternalUser, P> externalUserToPrincipal)
+    {
+        super(externalUserToPrincipal);
+    }
+
     // -------------------------------------------------------------------------
-    // IMPLEMENTATION: Authenticator
+    // IMPLEMENTATION:  ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     @Override
-    public Optional<ExternalUser> authenticate(final MultivaluedMap<String, String> headers)
+    public Optional<InternalUser> doAuthenticate(final MultivaluedMap<String, String> headers)
             throws AuthenticationException
     {
         logger.info("Authenticating via header fields ...");
@@ -99,7 +114,7 @@ public class HeaderFieldsAuthenticator
         final String username = headers.getFirst(DEFAULT_FIELD_USERNAME);
         try
         {
-            final ImmutableExternalUser user = ImmutableExternalUser.builder()
+            final ImmutableInternalUser user = ImmutableInternalUser.builder()
                     .username(extractHeaderValue(DEFAULT_FIELD_USERNAME, headers))
                     .firstname(extractHeaderValue(DEFAULT_FIELD_FIRSTNAME, headers))
                     .lastname(extractHeaderValue(DEFAULT_FIELD_LASTNAME, headers))

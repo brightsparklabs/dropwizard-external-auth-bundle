@@ -8,7 +8,6 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.dropwizard.auth.AuthenticationException;
-import io.dropwizard.auth.Authenticator;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import org.slf4j.Logger;
@@ -16,17 +15,22 @@ import org.slf4j.LoggerFactory;
 
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.Principal;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Authenticates a user based on the presence of a valid JSON Web Token (JWT).
  *
+ * @param <P>
+ *         Type of {@link Principal} to return for authenticated users.
+ *
  * @author brightSPARK Labs
  */
-public class JwtAuthenticator implements Authenticator<String, ExternalUser>
+public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator<String, P>
 {
     // -------------------------------------------------------------------------
     // CONSTANTS
@@ -54,11 +58,15 @@ public class JwtAuthenticator implements Authenticator<String, ExternalUser>
      * Creates a new authenticator which validates JWTs using the specified public signing key. This
      * should be the signing key of the Identity Provider who signed the JWT.
      *
+     * @param externalUserToPrincipal
+     *         Converts the internal user to the {@link Principal} used in the system.
      * @param signingKey
      *         signing key to use to validate tokens.
      */
-    JwtAuthenticator(String signingKey)
+    JwtAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
+            final String signingKey)
     {
+        super(externalUserToPrincipal);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(Decoders.BASE64.decode(signingKey));
         Key key = null;
         try
@@ -73,11 +81,11 @@ public class JwtAuthenticator implements Authenticator<String, ExternalUser>
     }
 
     // -------------------------------------------------------------------------
-    // IMPLEMENTATION:  Authenticator
+    // IMPLEMENTATION:  ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     @Override
-    public Optional<ExternalUser> authenticate(final String jwt) throws AuthenticationException
+    public Optional<InternalUser> doAuthenticate(final String jwt) throws AuthenticationException
     {
         logger.info("Authenticating via JWT [{}] ...", jwt);
         final Jws<Claims> jws;
@@ -88,7 +96,7 @@ public class JwtAuthenticator implements Authenticator<String, ExternalUser>
         catch (JwtException ex)
         {
             logger.info("Authentication denied - JWT is invalid [{}]", ex.getMessage());
-            throw new AuthenticationException(ex);
+            return Optional.empty();
         }
 
         final Claims claims = jws.getBody();
@@ -101,7 +109,7 @@ public class JwtAuthenticator implements Authenticator<String, ExternalUser>
         @SuppressWarnings("unchecked")
         final List<String> roles = (List<String>) account.getOrDefault("roles", ImmutableList.of());
 
-        final ImmutableExternalUser user = ImmutableExternalUser.builder()
+        final ImmutableInternalUser user = ImmutableInternalUser.builder()
                 .firstname(claims.get("given_name", String.class))
                 .lastname(claims.get("family_name", String.class))
                 .username(claims.get("preferred_username", String.class))

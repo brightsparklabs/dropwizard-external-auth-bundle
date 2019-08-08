@@ -8,6 +8,7 @@ package com.brightsparklabs.dropwizard.bundles.auth.external
 import spock.lang.Specification
 
 import javax.ws.rs.core.MultivaluedHashMap
+import java.util.function.Function
 
 /**
  * Units tests for {@link HeaderFieldsAuthenticator}.
@@ -20,7 +21,13 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         def username = "${firstname}.${lastname}".toString()
         def email = "${username}@email.com".toString()
         def headers = createHeaders(username, firstname, lastname, email, groups, roles)
-        def instance = new HeaderFieldsAuthenticator()
+        def converter = new Function<InternalUser, InternalUser>() {
+            @Override
+            InternalUser apply(final InternalUser externalUser) {
+                return externalUser
+            }
+        }
+        def instance = new HeaderFieldsAuthenticator(converter)
 
         when:
         def result = instance.authenticate(headers).get()

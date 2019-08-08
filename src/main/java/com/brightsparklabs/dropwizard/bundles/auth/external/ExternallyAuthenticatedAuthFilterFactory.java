@@ -14,10 +14,14 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 
 import javax.validation.constraints.NotNull;
+import java.security.Principal;
+import java.util.function.Function;
 
 /**
  * Factory for producing an {@link AuthFilter} which authenticates a user based on information
  * passed to it by an external authentication provider.
+ *
+ * This will be created by Dropwizard + Jackson.
  */
 @JsonTypeInfo(use = Id.NAME, property = "method")
 @JsonSubTypes({
@@ -46,10 +50,19 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
     // -------------------------------------------------------------------------
 
     /**
+     * Returns an {@link AuthFilter} which authenticates a user based on information passed to it by
+     * an external authentication provider.
+     *
+     * @param externalUserToPrincipal
+     *         Converts the internal user to the {@link Principal} used in the system.
+     * @param <P>
+     *         The {@link Principal} the filter should return.
+     *
      * @return An {@link AuthFilter} which authenticates a user based on information passed to it by
      * an external authentication provider.
      */
-    public abstract AuthFilter<?, ExternalUser> build();
+    public abstract <P extends Principal> AuthFilter<?, P> build(
+            Function<InternalUser, P> externalUserToPrincipal);
 
     // -------------------------------------------------------------------------
     // PRIVATE METHODS
@@ -63,7 +76,8 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
      * Factory for producing an {@link AuthFilter} which authenticates a user based on a JWT passed
      * to it by an external authentication provider.
      */
-    public static class JwtAuthFilterFactory extends ExternallyAuthenticatedAuthFilterFactory
+    public static class JwtAuthFilterFactory<P extends Principal>
+            extends ExternallyAuthenticatedAuthFilterFactory
     {
         // -------------------------------------------------------------------------
         // INSTANCE VARIABLES
@@ -79,12 +93,12 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
         // -------------------------------------------------------------------------
 
         @Override
-        public AuthFilter<?, ExternalUser> build()
+        public <E extends Principal> AuthFilter<?, E> build(
+                final Function<InternalUser, E> externalUserToPrincipal)
         {
             return new OAuthCredentialAuthFilter.
-                    Builder<ExternalUser>().setAuthenticator(new JwtAuthenticator(signingKey))
-                    .setPrefix("Bearer")
-                    .buildAuthFilter();
+                    Builder<E>().setAuthenticator(new JwtAuthenticator<>(externalUserToPrincipal,
+                    signingKey)).setPrefix("Bearer").buildAuthFilter();
         }
     }
 
@@ -100,11 +114,12 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
         // -------------------------------------------------------------------------
 
         @Override
-        public AuthFilter<?, ExternalUser> build()
+        public <E extends Principal> AuthFilter<?, E> build(
+                final Function<InternalUser, E> externalUserToPrincipal)
         {
             return new HeaderFieldsAuthFilter.
-                    Builder<ExternalUser>().setAuthenticator(new HeaderFieldsAuthenticator())
-                    .buildAuthFilter();
+                    Builder<E>().setAuthenticator(new HeaderFieldsAuthenticator<>(
+                    externalUserToPrincipal)).buildAuthFilter();
         }
     }
 }

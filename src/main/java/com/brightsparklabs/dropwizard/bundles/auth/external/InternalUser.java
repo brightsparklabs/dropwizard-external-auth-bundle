@@ -11,12 +11,13 @@ import org.immutables.value.Value;
 import java.security.Principal;
 
 /**
- * An externally authenticated user.
+ * An authenticated user as used internally by this bundle. Clients should translate this into the
+ * type of {@link Principal} used within their systems.
  *
  * @author brightSPARK Labs
  */
 @Value.Immutable
-public abstract class ExternalUser implements Principal
+public abstract class InternalUser implements Principal
 {
     // -------------------------------------------------------------------------
     // CONSTANTS
