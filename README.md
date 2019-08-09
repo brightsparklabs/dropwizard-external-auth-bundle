@@ -14,7 +14,8 @@ Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
 
         # build.gradle
         repositories {
-            // BSL repo on bintray (should be able to remove once published to jcenter)
+            jcenter()
+            // ALTERNATIVELY: directly use the BSL repo on bintray
             maven { url "https://dl.bintray.com/brightsparklabs/maven" }
         }
 
