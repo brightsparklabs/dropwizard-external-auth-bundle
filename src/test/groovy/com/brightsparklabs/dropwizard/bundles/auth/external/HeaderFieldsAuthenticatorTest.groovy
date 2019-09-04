@@ -5,6 +5,7 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import spock.lang.Specification
 
 import javax.ws.rs.core.MultivaluedHashMap
@@ -72,6 +73,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
     // FIXTURES
     // ------------------------------------------------------------------------------
 
+    @SuppressFBWarnings("SE_NO_SERIALVERSIONID")
     def createHeaders(username, firstname, lastname, email, groups, roles) {
         def headers = new MultivaluedHashMap<String, String>()
         headers.with {
