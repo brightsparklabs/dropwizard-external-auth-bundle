@@ -1,6 +1,6 @@
 # dropwizard-external-auth-bundle
 
-[ ![Download](https://api.bintray.com/packages/brightsparklabs/java/dropwizard-external-auth-bundle/images/download.svg) ](https://bintray.com/brightsparklabs/java/dropwizard-external-auth-bundle/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/brightsparklabs/maven/dropwizard-external-auth-bundle/images/download.svg) ](https://bintray.com/brightsparklabs/maven/dropwizard-external-auth-bundle/_latestVersion)
 
 A Dropwizard bundle which allows your service to trust authentication from an
 external identity provider.
