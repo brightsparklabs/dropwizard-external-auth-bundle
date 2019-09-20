@@ -20,13 +20,14 @@ import java.util.function.Function;
 /**
  * Factory for producing an {@link AuthFilter} which authenticates a user based on information
  * passed to it by an external authentication provider.
- *
+ * <p>
  * This will be created by Dropwizard + Jackson.
  */
 @JsonTypeInfo(use = Id.NAME, property = "method")
 @JsonSubTypes({
         @Type(value = ExternallyAuthenticatedAuthFilterFactory.JwtAuthFilterFactory.class, name = "jwt"),
-        @Type(value = ExternallyAuthenticatedAuthFilterFactory.HttpHeadersAuthFilterFactory.class, name = "httpHeaders") })
+        @Type(value = ExternallyAuthenticatedAuthFilterFactory.HttpHeadersAuthFilterFactory.class, name = "httpHeaders"),
+        @Type(value = ExternallyAuthenticatedAuthFilterFactory.DevAuthFilterFactory.class, name = "dev") })
 public abstract class ExternallyAuthenticatedAuthFilterFactory
 {
     // -------------------------------------------------------------------------
@@ -96,6 +97,12 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal)
         {
+            if (signingKey == null)
+            {
+                throw new IllegalArgumentException(
+                        "signingKey has not been defined in authentication configuration");
+            }
+
             return new OAuthCredentialAuthFilter.
                     Builder<E>().setAuthenticator(new JwtAuthenticator<>(externalUserToPrincipal,
                     signingKey)).setPrefix("Bearer").buildAuthFilter();
@@ -120,6 +127,41 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
             return new HeaderFieldsAuthFilter.
                     Builder<E>().setAuthenticator(new HeaderFieldsAuthenticator<>(
                     externalUserToPrincipal)).buildAuthFilter();
+        }
+    }
+
+    /**
+     * Factory for producing an {@link AuthFilter} which returns a fixed principal. Should only be
+     * used for development.
+     */
+    public static class DevAuthFilterFactory extends ExternallyAuthenticatedAuthFilterFactory
+    {
+        // -------------------------------------------------------------------------
+        // INSTANCE VARIABLES
+        // -------------------------------------------------------------------------
+
+        /** User to return */
+        @NotNull
+        @JsonProperty
+        private InternalUser user;
+
+        // -------------------------------------------------------------------------
+        // IMPLEMENTATION: ExternallyAuthenticatedAuthFilterFactory
+        // -------------------------------------------------------------------------
+
+        @Override
+        public <E extends Principal> AuthFilter<?, E> build(
+                final Function<InternalUser, E> externalUserToPrincipal)
+        {
+            if (user == null)
+            {
+                throw new IllegalArgumentException(
+                        "user has not been defined in authentication configuration");
+            }
+
+            return new DevAuthFilter.
+                    Builder<E>().setAuthenticator(new DevAuthenticator<>(externalUserToPrincipal,
+                    user)).buildAuthFilter();
         }
     }
 }

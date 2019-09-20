@@ -5,6 +5,7 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableSet;
 import org.immutables.value.Value;
 
@@ -17,6 +18,7 @@ import java.security.Principal;
  * @author brightSPARK Labs
  */
 @Value.Immutable
+@JsonDeserialize(builder = ImmutableInternalUser.Builder.class)
 public abstract class InternalUser implements Principal
 {
     // -------------------------------------------------------------------------

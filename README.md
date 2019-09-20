@@ -45,11 +45,27 @@ Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
 
         auth:
           # external id provider will supply details of the authenticated user via various http headers
-          method: httpHeaders
+          #method: httpHeaders
 
           # external id provider will supply details of the authenticated user via a JSON Web Token (JWT)
           #method: jwt
           #signingKey: <INSERT THE BASE64 ENCODED KEY USED BY ID PROVIDER TO SIGN THE JWT>
+
+         # DEVELOPMENT ONLY - external id provider will always return the user defined here
+         method: dev
+         user:
+           firstname: Test
+           lastname: User
+           username: test.user
+           email: test.user@email.test
+           groups:
+             - GROUP_1
+             - GROUP_2
+             - GROUP_3
+           roles:
+             - ROLE_1
+             - ROLE_2
+             - ROLE_3
 
 - Add bundle during initialization:
 
