@@ -117,6 +117,7 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
                 // TODO: extract groups
                 .groups(ImmutableSet.of())
                 .roles(ImmutableSet.copyOf(roles))
+                .logoutUrl(claims.getIssuer() + "/protocol/openid-connect/logout")
                 .build();
         logger.info("Authentication successful for username [{}]", user.getUsername());
         return Optional.of(user);

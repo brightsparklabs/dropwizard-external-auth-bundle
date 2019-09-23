@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableSet;
 import org.immutables.value.Value;
 
 import java.security.Principal;
+import java.util.Optional;
 
 /**
  * An authenticated user as used internally by this bundle. Clients should translate this into the
@@ -68,4 +69,9 @@ public abstract class InternalUser implements Principal
      * @return user's roles.
      */
     public abstract ImmutableSet<String> getRoles();
+
+    /**
+     * @return URL for logging out the user.
+     */
+    public abstract Optional<String> getLogoutUrl();
 }
