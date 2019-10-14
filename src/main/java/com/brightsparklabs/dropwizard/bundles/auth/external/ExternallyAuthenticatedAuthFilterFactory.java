@@ -11,8 +11,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import io.dropwizard.auth.AuthFilter;
+import io.dropwizard.auth.Authorizer;
+import io.dropwizard.auth.PermitAllAuthorizer;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.util.function.Function;
@@ -54,16 +57,15 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
      * Returns an {@link AuthFilter} which authenticates a user based on information passed to it by
      * an external authentication provider.
      *
-     * @param externalUserToPrincipal
-     *         Converts the internal user to the {@link Principal} used in the system.
-     * @param <P>
-     *         The {@link Principal} the filter should return.
-     *
+     * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
+     *                                the system.
+     * @param authorizer              The {@link Authorizer} to use.
+     * @param <P>                     The {@link Principal} the filter should return.
      * @return An {@link AuthFilter} which authenticates a user based on information passed to it by
      * an external authentication provider.
      */
     public abstract <P extends Principal> AuthFilter<?, P> build(
-            Function<InternalUser, P> externalUserToPrincipal);
+            Function<InternalUser, P> externalUserToPrincipal, Authorizer<P> authorizer);
 
     // -------------------------------------------------------------------------
     // PRIVATE METHODS
@@ -95,7 +97,8 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
 
         @Override
         public <E extends Principal> AuthFilter<?, E> build(
-                final Function<InternalUser, E> externalUserToPrincipal)
+                final Function<InternalUser, E> externalUserToPrincipal,
+                final Authorizer<E> authorizer)
         {
             if (signingKey == null)
             {
@@ -103,9 +106,12 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
                         "signingKey has not been defined in authentication configuration");
             }
 
-            return new OAuthCredentialAuthFilter.
-                    Builder<E>().setAuthenticator(new JwtAuthenticator<>(externalUserToPrincipal,
-                    signingKey)).setPrefix("Bearer").buildAuthFilter();
+            return new OAuthCredentialAuthFilter.Builder<E>() //
+                    .setAuthenticator(new JwtAuthenticator<>(externalUserToPrincipal, signingKey))
+                    .setAuthorizer(authorizer)
+                    .setPrefix("Bearer")
+                    .buildAuthFilter();
+
         }
     }
 
@@ -122,11 +128,13 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
 
         @Override
         public <E extends Principal> AuthFilter<?, E> build(
-                final Function<InternalUser, E> externalUserToPrincipal)
+                final Function<InternalUser, E> externalUserToPrincipal,
+                final Authorizer<E> authorizer)
         {
-            return new HeaderFieldsAuthFilter.
-                    Builder<E>().setAuthenticator(new HeaderFieldsAuthenticator<>(
-                    externalUserToPrincipal)).buildAuthFilter();
+            return new HeaderFieldsAuthFilter.Builder<E>() //
+                    .setAuthenticator(new HeaderFieldsAuthenticator<>(externalUserToPrincipal)) //
+                    .setAuthorizer(authorizer) //
+                    .buildAuthFilter();
         }
     }
 
@@ -151,7 +159,8 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
 
         @Override
         public <E extends Principal> AuthFilter<?, E> build(
-                final Function<InternalUser, E> externalUserToPrincipal)
+                final Function<InternalUser, E> externalUserToPrincipal,
+                final Authorizer<E> authorizer)
         {
             if (user == null)
             {
@@ -159,9 +168,10 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
                         "user has not been defined in authentication configuration");
             }
 
-            return new DevAuthFilter.
-                    Builder<E>().setAuthenticator(new DevAuthenticator<>(externalUserToPrincipal,
-                    user)).buildAuthFilter();
+            return new DevAuthFilter.Builder<E>() //
+                    .setAuthenticator(new DevAuthenticator<>(externalUserToPrincipal, user)) //
+                    .setAuthorizer(authorizer) //
+                    .buildAuthFilter();
         }
     }
 }
