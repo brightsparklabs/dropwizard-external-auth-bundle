@@ -14,6 +14,7 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authorizer;
 import io.dropwizard.auth.PermitAllAuthorizer;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -87,7 +88,7 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
         // -------------------------------------------------------------------------
 
         /** Public signing key used to sign the JWT */
-        @NotNull
+        @NotEmpty
         @JsonProperty
         private String signingKey;
 
@@ -162,12 +163,6 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
                 final Function<InternalUser, E> externalUserToPrincipal,
                 final Authorizer<E> authorizer)
         {
-            if (user == null)
-            {
-                throw new IllegalArgumentException(
-                        "user has not been defined in authentication configuration");
-            }
-
             return new DevAuthFilter.Builder<E>() //
                     .setAuthenticator(new DevAuthenticator<>(externalUserToPrincipal, user)) //
                     .setAuthorizer(authorizer) //

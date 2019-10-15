@@ -53,6 +53,7 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
     /** Authorizer to use - will default to permit all*/
     private final Authorizer<P> authorizer;
 
+    /** determines whether to allow dynamic, role based Authorization */
     private final boolean setupRolesAllowedDynamicFeature;
 
     // -------------------------------------------------------------------------
