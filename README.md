@@ -81,9 +81,13 @@ Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
                         .groups(user.getGroups())
                         .roles(user.getRoles())
                         .build();
+
+                // Optionally create an Authorizer
+                final Authorizer<User> authorizer = (p, r) -> p.getRoles().contains(r);
+
                 // create and apply the bundle
                 final ExternallyAuthenticatedAuthBundle<User, MyConfiguration> authBundle
-                        = new ExternallyAuthenticatedAuthBundle<>(User.class, converter);
+                        = new ExternallyAuthenticatedAuthBundle<>(User.class, converter, authorizer);
                 bootstrap.addBundle(authBundle);
             }
         }
