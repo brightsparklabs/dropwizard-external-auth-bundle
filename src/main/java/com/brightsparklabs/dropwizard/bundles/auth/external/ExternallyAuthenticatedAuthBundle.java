@@ -10,10 +10,8 @@ import io.dropwizard.auth.*;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
-import org.immutables.value.internal.$guava$.collect.$ComputationException;
 
 import java.security.Principal;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Objects.*;

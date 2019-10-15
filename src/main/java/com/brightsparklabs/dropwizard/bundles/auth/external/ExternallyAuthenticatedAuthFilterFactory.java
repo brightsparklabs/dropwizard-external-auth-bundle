@@ -12,11 +12,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authorizer;
-import io.dropwizard.auth.PermitAllAuthorizer;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.util.function.Function;
