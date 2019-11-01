@@ -7,6 +7,7 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import io.dropwizard.auth.AuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -20,14 +21,13 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
  * Authenticates a user based on the presence of a valid JSON Web Token (JWT).
  *
- * @param <P>
- *         Type of {@link Principal} to return for authenticated users.
- *
+ * @param <P> Type of {@link Principal} to return for authenticated users.
  * @author brightSPARK Labs
  */
 public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator<String, P>
@@ -40,14 +40,18 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
     // CLASS VARIABLES
     // -------------------------------------------------------------------------
 
-    /** Class logger */
+    /**
+     * Class logger
+     */
     private static Logger logger = LoggerFactory.getLogger(JwtAuthenticator.class);
 
     // -------------------------------------------------------------------------
     // INSTANCE VARIABLES
     // -------------------------------------------------------------------------
 
-    /** Parser for validating tokens */
+    /**
+     * Parser for validating tokens
+     */
     private final JwtParser jwtParser;
 
     // -------------------------------------------------------------------------
@@ -58,10 +62,9 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
      * Creates a new authenticator which validates JWTs using the specified public signing key. This
      * should be the signing key of the Identity Provider who signed the JWT.
      *
-     * @param externalUserToPrincipal
-     *         Converts the internal user to the {@link Principal} used in the system.
-     * @param signingKey
-     *         signing key to use to validate tokens.
+     * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
+     *                                the system.
+     * @param signingKey              signing key to use to validate tokens.
      */
     JwtAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
             final String signingKey)
@@ -103,11 +106,7 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
         logger.info("JWT contains: {}", claims);
 
         // extract groups and roles
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> account = (Map<String, Object>) claims.get("resource_access",
-                Map.class).get("account");
-        @SuppressWarnings("unchecked")
-        final List<String> roles = (List<String>) account.getOrDefault("roles", ImmutableList.of());
+        final ImmutableList<String> roles = getRoles(claims);
 
         final ImmutableInternalUser user = ImmutableInternalUser.builder()
                 .firstname(claims.get("given_name", String.class))
@@ -130,4 +129,32 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
+
+    private ImmutableList<String> getRoles(final Claims claims)
+    {
+        // Roles come from realm_access and resource_access
+
+        final Set<String> roles = Sets.newHashSet();
+
+        // resource_access contains the roles for all the appropriate clients.
+        @SuppressWarnings("unchecked")
+        final Map<String, Map<String, List<String>>> resource = claims.get("resource_access",
+                Map.class);
+
+        resource.values().stream() //
+                .map(this::getRolesFrom) //
+                .forEach(roles::addAll);
+
+        @SuppressWarnings("unchecked")
+        final Map<String, List<String>> realm = claims.get("realm_access", Map.class);
+
+        roles.addAll(getRolesFrom(realm));
+
+        return ImmutableList.copyOf(roles);
+    }
+
+    private ImmutableList<String> getRolesFrom(final Map<String, List<String>> container)
+    {
+        return ImmutableList.copyOf(container.getOrDefault("roles", ImmutableList.of()));
+    }
 }
