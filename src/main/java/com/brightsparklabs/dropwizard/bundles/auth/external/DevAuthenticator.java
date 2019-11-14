@@ -5,18 +5,11 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import io.dropwizard.auth.AuthenticationException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -53,8 +46,8 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     /**
-     * Creates a new authenticator which validates JWTs using the specified public signing key. This
-     * should be the signing key of the Identity Provider who signed the JWT.
+     * Creates a new authenticator which always returns the User from configuration. For use during
+     * development only
      *
      * @param externalUserToPrincipal
      *         Converts the internal user to the {@link Principal} used in the system.
@@ -73,7 +66,8 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     @Override
-    public Optional<InternalUser> doAuthenticate(final String credentials) throws AuthenticationException
+    public Optional<InternalUser> doAuthenticate(final String credentials)
+            throws AuthenticationException
     {
         logger.warn("********** USING DEV MODE AUTHENTICATOR. DO NOT USE IN PRODUCTION **********");
         return Optional.of(user);

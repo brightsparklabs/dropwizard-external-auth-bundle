@@ -22,12 +22,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         def username = "${firstname}.${lastname}".toString()
         def email = "${username}@email.com".toString()
         def headers = createHeaders(username, firstname, lastname, email, groups, roles)
-        def converter = new Function<InternalUser, InternalUser>() {
-            @Override
-            InternalUser apply(final InternalUser externalUser) {
-                return externalUser
-            }
-        }
+        def converter = Function.identity()
         def instance = new HeaderFieldsAuthenticator(converter)
 
         when:
@@ -53,7 +48,8 @@ class HeaderFieldsAuthenticatorTest extends Specification {
     def "authenticate denied"() {
         given:
         def headers = createHeaders(username, firstname, lastname, email, groups, roles)
-        def instance = new HeaderFieldsAuthenticator()
+        def converter = Function.identity()
+        def instance = new HeaderFieldsAuthenticator(converter)
 
         when:
         def result = instance.authenticate(headers)
