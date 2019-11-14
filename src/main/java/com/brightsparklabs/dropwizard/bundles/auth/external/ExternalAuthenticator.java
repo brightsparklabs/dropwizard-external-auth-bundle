@@ -50,7 +50,7 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
      * @param externalUserToPrincipal
      *         Converts the internal user to the {@link Principal} used in the system.
      */
-    ExternalAuthenticator(final Function<InternalUser, P> externalUserToPrincipal)
+    public ExternalAuthenticator(final Function<InternalUser, P> externalUserToPrincipal)
     {
         this.externalUserToPrincipal = externalUserToPrincipal;
     }
@@ -62,13 +62,8 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
     @Override
     public Optional<P> authenticate(final C credentials) throws AuthenticationException
     {
-        final Optional<InternalUser> user = doAuthenticate(credentials);
-        if (!user.isPresent())
-        {
-            return Optional.empty();
-        }
-        final P principal = externalUserToPrincipal.apply(user.get());
-        return Optional.of(principal);
+        return doAuthenticate(credentials) //
+                .map(externalUserToPrincipal::apply);
     }
 
     // -------------------------------------------------------------------------

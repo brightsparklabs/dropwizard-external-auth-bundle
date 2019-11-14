@@ -1,0 +1,4 @@
+
+# contains the factory class to create polymorphic classes.
+
+com.brightsparklabs.dropwizard.bundles.auth.external.ExternallyAuthenticatedAuthFilterFactory
