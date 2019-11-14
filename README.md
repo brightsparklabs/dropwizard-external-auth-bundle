@@ -96,6 +96,15 @@ Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
     - If using `method: httpHeaders`, all mandatory headers are provided in request.
     - If using `method: jwt`, a valid JWT is in the header `Authorization: Bearer <jwt>`.
 
+# Extending
+
+To create your own instances of ExternallyAuthenticatedAuthFilterFactory from configuration,
+ie instead of the bundled jwt/httpHeaders/dev, then add a file to
+
+.../resources/META-INF/services/com.brightsparklabs.dropwizard.bundles.auth.external.ExternallyAuthenticatedAuthFilterFactory
+
+and add the full class name of your subclass of ExternallyAuthenticatedAuthFilterFactory inside.
+
 # Development
 
 - Publish new versions via:

@@ -6,13 +6,15 @@
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.google.common.collect.ImmutableList;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authorizer;
+import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
+import io.dropwizard.jackson.Discoverable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -26,27 +28,8 @@ import java.util.function.Function;
  * This will be created by Dropwizard + Jackson.
  */
 @JsonTypeInfo(use = Id.NAME, property = "method")
-@JsonSubTypes({
-        @Type(value = ExternallyAuthenticatedAuthFilterFactory.JwtAuthFilterFactory.class, name = "jwt"),
-        @Type(value = ExternallyAuthenticatedAuthFilterFactory.HttpHeadersAuthFilterFactory.class, name = "httpHeaders"),
-        @Type(value = ExternallyAuthenticatedAuthFilterFactory.DevAuthFilterFactory.class, name = "dev") })
-public abstract class ExternallyAuthenticatedAuthFilterFactory
+public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discoverable
 {
-    // -------------------------------------------------------------------------
-    // CONSTANTS
-    // -------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------
-    // CLASS VARIABLES
-    // -------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------
-    // INSTANCE VARIABLES
-    // -------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------
-    // CONSTRUCTION
-    // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
     // PUBLIC METHODS
@@ -66,9 +49,6 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
     public abstract <P extends Principal> AuthFilter<?, P> build(
             Function<InternalUser, P> externalUserToPrincipal, Authorizer<P> authorizer);
 
-    // -------------------------------------------------------------------------
-    // PRIVATE METHODS
-    // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
     // INNER CLASSES
@@ -78,6 +58,7 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
      * Factory for producing an {@link AuthFilter} which authenticates a user based on a JWT passed
      * to it by an external authentication provider.
      */
+    @JsonTypeName("jwt")
     public static class JwtAuthFilterFactory<P extends Principal>
             extends ExternallyAuthenticatedAuthFilterFactory
     {
@@ -118,6 +99,7 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
      * Factory for producing an {@link AuthFilter} which authenticates a user based on HTTP headers
      * passed to it by an external authentication provider.
      */
+    @JsonTypeName("httpHeaders")
     public static class HttpHeadersAuthFilterFactory
             extends ExternallyAuthenticatedAuthFilterFactory
     {
@@ -138,16 +120,58 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory
     }
 
     /**
+     * Factory for producing an {@link AuthFilter} which delegates to a chain of others. Wrapper
+     * around https://www.dropwizard.io/en/stable/manual/auth.html#chained-factories
+     */
+    @JsonTypeName("chained")
+    public static class ChainedAuthFilterFactory<P extends Principal>
+            extends ExternallyAuthenticatedAuthFilterFactory
+    {
+
+        // -------------------------------------------------------------------------
+        // INSTANCE VARIABLES
+        // -------------------------------------------------------------------------
+
+        /** The AuthFilters that this will delegate to */
+        @NotEmpty
+        @JsonProperty
+        private ImmutableList<ExternallyAuthenticatedAuthFilterFactory> delegates;
+
+        // -------------------------------------------------------------------------
+        // IMPLEMENTATION: ExternallyAuthenticatedAuthFilterFactory
+        // -------------------------------------------------------------------------
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <E extends Principal> AuthFilter<?, E> build(
+                final Function<InternalUser, E> externalUserToPrincipal,
+                final Authorizer<E> authorizer)
+        {
+            final ImmutableList<AuthFilter> authFilters = delegates.stream()
+                    .map(d -> d.build(externalUserToPrincipal, authorizer))
+                    .collect(ImmutableList.toImmutableList());
+
+            // This is "unchecked" because we may have different types of C (credentials)
+            // which is ok.
+            // We're not actually checking that we have the same E for all delegates either.
+            return new ChainedAuthFilter(authFilters);
+        }
+    }
+
+    /**
      * Factory for producing an {@link AuthFilter} which returns a fixed principal. Should only be
      * used for development.
      */
+    @JsonTypeName("dev")
     public static class DevAuthFilterFactory extends ExternallyAuthenticatedAuthFilterFactory
     {
         // -------------------------------------------------------------------------
         // INSTANCE VARIABLES
         // -------------------------------------------------------------------------
 
-        /** User to return */
+        /**
+         * User to return
+         */
         @NotNull
         @JsonProperty
         private InternalUser user;
