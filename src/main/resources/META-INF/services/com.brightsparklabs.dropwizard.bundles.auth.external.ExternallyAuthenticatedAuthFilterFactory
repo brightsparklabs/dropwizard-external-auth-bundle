@@ -1,0 +1,7 @@
+
+# Classes that this library provides as ExternallyAuthenticatedAuthFilterFactory implementations.
+
+com.brightsparklabs.dropwizard.bundles.auth.external.ExternallyAuthenticatedAuthFilterFactory$JwtAuthFilterFactory
+com.brightsparklabs.dropwizard.bundles.auth.external.ExternallyAuthenticatedAuthFilterFactory$HttpHeadersAuthFilterFactory
+com.brightsparklabs.dropwizard.bundles.auth.external.ExternallyAuthenticatedAuthFilterFactory$ChainedAuthFilterFactory
+com.brightsparklabs.dropwizard.bundles.auth.external.ExternallyAuthenticatedAuthFilterFactory$DevAuthFilterFactory
