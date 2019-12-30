@@ -118,7 +118,7 @@ public class HeaderFieldsAuthenticator<P extends Principal>
                     .username(extractHeaderValue(DEFAULT_FIELD_USERNAME, headers))
                     .firstname(extractHeaderValue(DEFAULT_FIELD_FIRSTNAME, headers))
                     .lastname(extractHeaderValue(DEFAULT_FIELD_LASTNAME, headers))
-                    .email(extractHeaderValue(DEFAULT_FIELD_EMAIL, headers))
+                    .email(Optional.ofNullable(headers.getFirst(DEFAULT_FIELD_EMAIL)))
                     .groups(groups)
                     .roles(roles)
                     .build();

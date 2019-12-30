@@ -30,9 +30,30 @@ class JwtAuthenticatorTest extends Specification {
         u.getLastname() == "admin"
         u.getFirstname() == "admin"
         u.getUsername() == "admin"
-        u.getEmail() == "admin@email.com"
+        u.getEmail().get() == "admin@email.com"
 
     }
 
+    def "doAuthenticateNoEmail"() {
 
+        given:
+        String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAty2VYUBIBOhYV6fgTt/yvTQZ9SUX7L+TIUZqcknAJ4LO/LTG5QbGgKiKRwb5F8vDDTRhqAOB2QrweTDCLRk3920zTCrvCYILTN9RWx9a+w1zFRTCkeDN3d6ekFg+FxkKsMROtDEIXktdNdbhwYwHnY8n1drxW9fNRsPFfMsO0/zI65g5f0I0UsX1JDWKIoNOZpWxSMCL9OcRFo3luPonw9gIr0c5G47O7PX+CUcx3G+VTvoftrNbGXa1s3J76/g/S0EbnwtpXSpUqn5nGKp6QvdGDlbkmfJDi+vgD6FK+WaNttlac+o1sxaxi20ZmEXnd3iJ6okvqjURtCchKsocPQIDAQAB"
+        def authenticator = new JwtAuthenticator<InternalUser>(Function.identity(), key)
+
+        // Hard coded, manually made using keycloak, with a long expiry (sometime in 2030)
+        String jwt = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJVeEh2ZUtxRDk4ay1aRlhMY2poNWsyQzdJZEZ4cFZ6NUU0cXpHbFR3NV9VIn0.eyJqdGkiOiIxY2VlYjViZS03MDlmLTQ5NzUtYjcwOC1jY2QwYWUyZDk0ZmUiLCJleHAiOjE4NjU2NDMxNzYsIm5iZiI6MCwiaWF0IjoxNTc3NjcyMTc5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAvYXV0aC9yZWFsbXMvbWFzdGVyIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjJkNzNkNDE4LWMzNzItNDM5NS1hOTMzLTRmOTc5OWZhOTQ2ZCIsInR5cCI6IkJlYXJlciIsImF6cCI6Im9zbW9zaXMiLCJhdXRoX3RpbWUiOjE1Nzc2NzE5NzYsInNlc3Npb25fc3RhdGUiOiJiMGNhZGQzZi1jMWZlLTQwMmItOTI5Zi1kOTJkODA2ZjRiZGEiLCJhY3IiOiIwIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIlRFU1QiLCJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoibm8gZW1haWwiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJub2VtYWlsIiwiZ2l2ZW5fbmFtZSI6Im5vIiwiZmFtaWx5X25hbWUiOiJlbWFpbCJ9.Uu8mS2VOzHyvUG7qSYMmIvUmEEhLNb-1wBwOg2CrCRHOojf2PXp6kYs436uxJgJUET4lWnB8RVJR6VzGY7-6grdS-60AUX7-a5U4xzJ1_uh_MnFBdhWv_kuyZO6Hh1BfkC54RPo1QdxNLYDYX6hcOYs1KTi8t4psPj0MLyp74TN-vv_DOhaBK_COuYaNzs1m9RCDJFv78uNwCblYa8UKdtotdyxNLd2QIy0px5fAasw_Mmiizjqug0GRVY7RFx6TeRabus44WWMTtBSFWBKFbO8ml7oCgQ4xUuR8IMXseUwRSlG258HBv5vZaXuMygyDxOfUk1cQX-prMH0Sz4vF6Q"
+
+
+        when:
+        Optional<InternalUser> user = authenticator.doAuthenticate(jwt)
+
+        then:
+        def u  = user.get()
+        u.getRoles().contains("TEST")
+        u.getLastname() == "email"
+        u.getFirstname() == "no"
+        u.getUsername() == "noemail"
+        !u.getEmail().isPresent()
+
+    }
 }

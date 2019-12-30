@@ -56,9 +56,9 @@ public abstract class InternalUser implements Principal
     public abstract String getLastname();
 
     /**
-     * @return user's email.
+     * @return user's Optional email.
      */
-    public abstract String getEmail();
+    public abstract Optional<String> getEmail();
 
     /**
      * @return user's group memberships.

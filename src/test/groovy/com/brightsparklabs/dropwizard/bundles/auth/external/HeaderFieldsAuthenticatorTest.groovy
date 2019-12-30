@@ -32,7 +32,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         result.username == username
         result.firstname == firstname
         result.lastname == lastname
-        result.email == email
+        result.email == Optional.of(email)
         result.groups.join(',') == expectedGroups
         result.roles.join(',') == expectedRoles
 
@@ -43,6 +43,28 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         "first"   | "last"   | null                | "  r1,   r2,   r3,, " | ""             | "r1,r2,r3"
         "first"   | "last"   | " ,  g1,  g2,   g3" | null                  | "g1,g2,g3"     | ""
         "first"   | "last"   | null                | null                  | ""             | ""
+    }
+
+    def "authenticate success no email"() {
+        given:
+        def firstname = "first"
+        def lastname = "last"
+        def username = "${firstname}.${lastname}".toString()
+        def email = null
+        def headers = createHeaders(username, firstname, lastname, email, null, null)
+        def converter = Function.identity()
+        def instance = new HeaderFieldsAuthenticator(converter)
+
+        when:
+        def result = instance.authenticate(headers).get()
+
+        then:
+        result.username == username
+        result.firstname == firstname
+        result.lastname == lastname
+        result.email == Optional.ofNullable(email)
+        result.groups.join(',') == ""
+        result.roles.join(',') == ""
     }
 
     def "authenticate denied"() {
@@ -61,7 +83,6 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         username     | firstname | email  | lastname               | groups | roles
         null         | "first"   | "last" | "first.last@email.com" | null   | null
         "first.last" | null      | "last" | "first.last@email.com" | null   | null
-        "first.last" | "first"   | null   | "first.last@email.com" | null   | null
         "first.last" | "first"   | "last" | null                   | null   | null
     }
 
