@@ -112,7 +112,7 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
                 .firstname(claims.get("given_name", String.class))
                 .lastname(claims.get("family_name", String.class))
                 .username(claims.get("preferred_username", String.class))
-                .email(claims.get("email", String.class))
+                .email(Optional.ofNullable(claims.get("email", String.class)))
                 // TODO: extract groups
                 .groups(ImmutableSet.of())
                 .roles(ImmutableSet.copyOf(roles))
