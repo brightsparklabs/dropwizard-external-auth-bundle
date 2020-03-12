@@ -5,6 +5,8 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
+import io.dropwizard.auth.AuthenticationException;
+
 /**
  * Interface for listeners to authentication events
  *
@@ -14,17 +16,21 @@ public interface AuthenticationEventListener {
 
     /**
      * Handler function for handling authentication success
+     *
+     * @param authenticatedUser the successfully-authenticated user
      */
-    void handleAuthenticationSuccess();
+    void onAuthenticationSuccess(InternalUser authenticatedUser);
 
     /**
      * Handler function for handling authentication failure - denied access
      */
-    void handleAuthenticationDenied();
+    void onAuthenticationDenied(AuthenticationDeniedException authDeniedException);
 
     /**
      * Handler function for handling authentication failure - invalid authentication request
+     *
+     * @param authException the authentication exception that was thrown
      */
-    void handleAuthenticationInvalid();
+    void onAuthenticationError(AuthenticationException authException);
 
 }

@@ -66,18 +66,17 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
     public Optional<P> authenticate(final C credentials) throws AuthenticationException
     {
         try {
-            final Optional<P> principal = doAuthenticate(credentials) //
-                    .map(externalUserToPrincipal);
-            if (principal.isPresent()) {
-                authenticationEventListeners.forEach(AuthenticationEventListener::handleAuthenticationSuccess);
-            } else {
-                authenticationEventListeners.forEach(AuthenticationEventListener::handleAuthenticationDenied);
-            }
-            return principal;
-        } catch (AuthenticationException ex) {
+            final InternalUser authenticatedInternalUser = doAuthenticate(credentials);
+            authenticationEventListeners.forEach(listener -> listener.onAuthenticationSuccess(authenticatedInternalUser));
+            return Optional.of(externalUserToPrincipal.apply(authenticatedInternalUser));
+        } catch (AuthenticationDeniedException authDeniedException) {
+            // Call listener functions and return an empty optional to indicate authentication was denied
+            authenticationEventListeners.forEach(listener -> listener.onAuthenticationDenied(authDeniedException));
+            return Optional.empty();
+        } catch (AuthenticationException authException) {
             // Call listener functions and propagate exception
-            authenticationEventListeners.forEach(AuthenticationEventListener::handleAuthenticationInvalid);
-            throw ex;
+            authenticationEventListeners.forEach(listener -> listener.onAuthenticationError(authException));
+            throw authException;
         }
     }
 
@@ -85,8 +84,8 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
-    public abstract Optional<InternalUser> doAuthenticate(final C credentials)
-            throws AuthenticationException;
+    public abstract InternalUser doAuthenticate(final C credentials)
+            throws AuthenticationException, AuthenticationDeniedException;
 
     // -------------------------------------------------------------------------
     // PRIVATE METHODS

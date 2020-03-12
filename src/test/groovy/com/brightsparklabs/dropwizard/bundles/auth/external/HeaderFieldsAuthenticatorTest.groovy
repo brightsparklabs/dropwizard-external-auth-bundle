@@ -38,7 +38,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         result.email == Optional.of(email)
         result.groups.join(',') == expectedGroups
         result.roles.join(',') == expectedRoles
-        1 * listener.handleAuthenticationSuccess()
+        1 * listener.onAuthenticationSuccess(*_)
 
         where:
         firstname | lastname | groups              | roles                 | expectedGroups | expectedRoles
@@ -71,7 +71,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         result.email == Optional.ofNullable(email)
         result.groups.join(',') == ""
         result.roles.join(',') == ""
-        1 * listener.handleAuthenticationSuccess()
+        1 * listener.onAuthenticationSuccess(*_)
     }
 
     def "authenticate denied"() {
@@ -87,7 +87,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
 
         then:
         !result.isPresent()
-        1 * listener.handleAuthenticationDenied()
+        1 * listener.onAuthenticationDenied()
 
         where:
         username     | firstname | email  | lastname               | groups | roles
@@ -108,7 +108,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
 
         then:
         thrown AuthenticationException
-        1 * listener.handleAuthenticationInvalid()
+        1 * listener.onAuthenticationError(*_)
 
     }
 

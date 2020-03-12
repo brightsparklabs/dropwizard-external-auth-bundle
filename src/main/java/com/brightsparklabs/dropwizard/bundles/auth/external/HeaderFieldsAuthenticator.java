@@ -88,8 +88,8 @@ public class HeaderFieldsAuthenticator<P extends Principal>
     // -------------------------------------------------------------------------
 
     @Override
-    public Optional<InternalUser> doAuthenticate(final MultivaluedMap<String, String> headers)
-            throws AuthenticationException
+    public InternalUser doAuthenticate(final MultivaluedMap<String, String> headers)
+            throws AuthenticationException, AuthenticationDeniedException
     {
         logger.info("Authenticating via header fields ...");
         if (headers == null)
@@ -123,12 +123,13 @@ public class HeaderFieldsAuthenticator<P extends Principal>
                     .roles(roles)
                     .build();
             logger.info("Authentication successful for username [{}]", username);
-            return Optional.of(user);
+            return user;
         }
         catch (IllegalArgumentException ex)
         {
-            logger.info("Authentication denied for username [{}] - {}", username, ex.getMessage());
-            return Optional.empty();
+            final String errorMessage = String.format("Authentication denied for username [%s] - %s", username, ex.getMessage());
+            logger.info(errorMessage);
+            throw new AuthenticationDeniedException(errorMessage);
         }
     }
 

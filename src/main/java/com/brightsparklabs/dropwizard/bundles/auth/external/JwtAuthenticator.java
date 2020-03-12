@@ -5,6 +5,7 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -35,6 +36,13 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
     // CONSTANTS
     // -------------------------------------------------------------------------
+
+    private final static String CLAIM_FIELD_USERNAME = "preferred_username";
+    private final static String CLAIM_FIELD_FIRSTNAME = "given_name";
+    private final static String CLAIM_FIELD_LASTNAME = "family_name";
+    private final static String CLAIM_FIELD_EMAIL = "email";
+    private final static String CLAIM_FIELD_RESOURCE_ACCESS = "resource_access";
+    private final static String CLAIM_FIELD_REALM_ACCESS = "realm_access";
 
     // -------------------------------------------------------------------------
     // CLASS VARIABLES
@@ -88,7 +96,7 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     @Override
-    public Optional<InternalUser> doAuthenticate(final String jwt) throws AuthenticationException
+    public InternalUser doAuthenticate(final String jwt) throws AuthenticationException, AuthenticationDeniedException
     {
         logger.info("Authenticating via JWT [{}] ...", jwt);
         final Jws<Claims> jws;
@@ -98,8 +106,8 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
         }
         catch (JwtException ex)
         {
-            logger.info("Authentication denied - JWT is invalid [{}]", ex.getMessage());
-            return Optional.empty();
+            logger.info("Authentication failed - JWT is invalid [{}]", ex.getMessage());
+            throw new AuthenticationException(ex);
         }
 
         final Claims claims = jws.getBody();
@@ -108,18 +116,27 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
         // extract groups and roles
         final ImmutableList<String> roles = getRoles(claims);
 
-        final ImmutableInternalUser user = ImmutableInternalUser.builder()
-                .firstname(claims.get("given_name", String.class))
-                .lastname(claims.get("family_name", String.class))
-                .username(claims.get("preferred_username", String.class))
-                .email(Optional.ofNullable(claims.get("email", String.class)))
-                // TODO: extract groups
-                .groups(ImmutableSet.of())
-                .roles(ImmutableSet.copyOf(roles))
-                .logoutUrl(claims.getIssuer() + "/protocol/openid-connect/logout")
-                .build();
-        logger.info("Authentication successful for username [{}]", user.getUsername());
-        return Optional.of(user);
+        try
+        {
+            final ImmutableInternalUser user = ImmutableInternalUser.builder()
+                    .username(extractClaimsValue(CLAIM_FIELD_USERNAME, claims))
+                    .firstname(extractClaimsValue(CLAIM_FIELD_FIRSTNAME, claims))
+                    .lastname(extractClaimsValue(CLAIM_FIELD_LASTNAME, claims))
+                    .email(Optional.ofNullable(claims.get(CLAIM_FIELD_EMAIL, String.class)))
+                    // TODO: extract groups
+                    .groups(ImmutableSet.of())
+                    .roles(ImmutableSet.copyOf(roles))
+                    .logoutUrl(claims.getIssuer() + "/protocol/openid-connect/logout")
+                    .build();
+            logger.info("Authentication successful for username [{}]", user.getUsername());
+            return user;
+        }
+        catch (IllegalArgumentException ex)
+        {
+            final String errorMessage = String.format("Authentication denied for JWT [%s] - %s", jwt, ex.getMessage());
+            logger.info(errorMessage);
+            throw new AuthenticationDeniedException(errorMessage);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -130,6 +147,18 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
 
+    private String extractClaimsValue(final String claimField, final Claims claims)
+            throws IllegalArgumentException
+    {
+        final String result = claims.get(claimField, String.class);
+        if (Strings.isNullOrEmpty(result))
+        {
+            throw new IllegalArgumentException(
+                    "JWT did not contain valid claim field [" + claimField + "]");
+        }
+        return result;
+    }
+
     private ImmutableList<String> getRoles(final Claims claims)
     {
         // Roles come from realm_access and resource_access
@@ -138,7 +167,7 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
 
         // resource_access contains the roles for all the appropriate clients.
         @SuppressWarnings("unchecked")
-        final Map<String, Map<String, List<String>>> resource = claims.get("resource_access",
+        final Map<String, Map<String, List<String>>> resource = claims.get(CLAIM_FIELD_RESOURCE_ACCESS,
                 Map.class);
 
         resource.values().stream() //
@@ -146,7 +175,7 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
                 .forEach(roles::addAll);
 
         @SuppressWarnings("unchecked")
-        final Map<String, List<String>> realm = claims.get("realm_access", Map.class);
+        final Map<String, List<String>> realm = claims.get(CLAIM_FIELD_REALM_ACCESS, Map.class);
 
         roles.addAll(getRolesFrom(realm));
 

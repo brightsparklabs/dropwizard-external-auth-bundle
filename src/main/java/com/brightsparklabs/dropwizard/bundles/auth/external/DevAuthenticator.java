@@ -67,11 +67,11 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     @Override
-    public Optional<InternalUser> doAuthenticate(final String credentials)
-            throws AuthenticationException
+    public InternalUser doAuthenticate(final String credentials)
+            throws AuthenticationException, AuthenticationDeniedException
     {
         logger.warn("********** USING DEV MODE AUTHENTICATOR. DO NOT USE IN PRODUCTION **********");
-        return Optional.of(user);
+        return user;
     }
 
     // -------------------------------------------------------------------------
