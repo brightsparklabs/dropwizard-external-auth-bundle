@@ -8,29 +8,29 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 import io.dropwizard.auth.AuthenticationException;
 
 /**
- * Interface for listeners to authentication events
+ * Abstract class for listeners to authentication events.
  *
  * @author brightSPARK Labs
  */
-public interface AuthenticationEventListener {
+public abstract class AuthenticationEventListener {
 
     /**
-     * Handler function for handling authentication success
+     * Listener function called on authentication success
      *
      * @param authenticatedUser the successfully-authenticated user
      */
-    void onAuthenticationSuccess(InternalUser authenticatedUser);
+    void onAuthenticationSuccess(InternalUser authenticatedUser){}
 
     /**
-     * Handler function for handling authentication failure - denied access
+     * Listener function called on authentication failure - denied access
      */
-    void onAuthenticationDenied(AuthenticationDeniedException authDeniedException);
+    void onAuthenticationDenied(AuthenticationDeniedException authDeniedException){}
 
     /**
-     * Handler function for handling authentication failure - invalid authentication request
+     * Listener function called on authentication failure - invalid authentication request
      *
      * @param authException the authentication exception that was thrown
      */
-    void onAuthenticationError(AuthenticationException authException);
+    void onAuthenticationError(AuthenticationException authException){}
 
 }
