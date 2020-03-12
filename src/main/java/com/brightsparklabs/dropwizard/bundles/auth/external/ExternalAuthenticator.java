@@ -52,7 +52,8 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
      * @param externalUserToPrincipal
      *         Converts the internal user to the {@link Principal} used in the system.
      */
-    public ExternalAuthenticator(final Function<InternalUser, P> externalUserToPrincipal, Iterable<AuthenticationEventListener> listeners)
+    public ExternalAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
+                                 final Iterable<AuthenticationEventListener> listeners)
     {
         this.externalUserToPrincipal = externalUserToPrincipal;
         this.authenticationEventListeners = listeners;

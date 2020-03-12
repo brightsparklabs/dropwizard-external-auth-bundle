@@ -75,7 +75,8 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
      * @param signingKey              signing key to use to validate tokens.
      */
     JwtAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
-            final String signingKey, Iterable<AuthenticationEventListener> listeners)
+                     final String signingKey,
+                     final Iterable<AuthenticationEventListener> listeners)
     {
         super(externalUserToPrincipal, listeners);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(Decoders.BASE64.decode(signingKey));
@@ -133,7 +134,7 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
         }
         catch (IllegalArgumentException ex)
         {
-            final String errorMessage = String.format("Authentication denied for JWT [%s] - %s", jwt, ex.getMessage());
+            final String errorMessage = String.format("Authentication denied for JWT [%s] - %s", claims.toString(), ex.getMessage());
             logger.info(errorMessage);
             throw new AuthenticationDeniedException(errorMessage);
         }

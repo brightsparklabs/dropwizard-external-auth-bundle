@@ -78,7 +78,8 @@ public class HeaderFieldsAuthenticator<P extends Principal>
      * @param externalUserToPrincipal
      *         Converts the internal user to the {@link Principal} used in the system.
      */
-    public HeaderFieldsAuthenticator(final Function<InternalUser, P> externalUserToPrincipal, final Iterable<AuthenticationEventListener> listeners)
+    public HeaderFieldsAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
+                                     final Iterable<AuthenticationEventListener> listeners)
     {
         super(externalUserToPrincipal, listeners);
     }
@@ -141,7 +142,7 @@ public class HeaderFieldsAuthenticator<P extends Principal>
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
 
-    private String extractHeaderValue(String headerName, MultivaluedMap<String, String> headers)
+    private String extractHeaderValue(final String headerName, final MultivaluedMap<String, String> headers)
             throws IllegalArgumentException
     {
         final String result = headers.getFirst(headerName);

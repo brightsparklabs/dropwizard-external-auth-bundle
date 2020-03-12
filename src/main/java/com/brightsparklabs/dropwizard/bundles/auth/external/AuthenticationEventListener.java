@@ -13,6 +13,7 @@ import io.dropwizard.auth.AuthenticationException;
  * @author brightSPARK Labs
  */
 public abstract class AuthenticationEventListener {
+    // TODO: Clean interface with abstract impl 'AbstractAuthenticationEventListener'
 
     /**
      * Listener function called on authentication success

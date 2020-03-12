@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -55,8 +54,8 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
      *         user to return
      */
     DevAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
-            final InternalUser user,
-            final Iterable<AuthenticationEventListener> listeners)
+                     final InternalUser user,
+                     final Iterable<AuthenticationEventListener> listeners)
     {
         super(externalUserToPrincipal, listeners);
         this.user = user;
