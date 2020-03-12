@@ -55,9 +55,10 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
      *         user to return
      */
     DevAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
-            final InternalUser user)
+            final InternalUser user,
+            final Iterable<AuthenticationEventListener> listeners)
     {
-        super(externalUserToPrincipal);
+        super(externalUserToPrincipal, listeners);
         this.user = user;
     }
 

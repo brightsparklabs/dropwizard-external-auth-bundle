@@ -39,6 +39,8 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
     /** Converts an internal user to the principal used in the system */
     private final Function<InternalUser, P> externalUserToPrincipal;
 
+    private final Iterable<AuthenticationEventListener> authenticationEventListeners;
+
     // -------------------------------------------------------------------------
     // CONSTRUCTION
     // -------------------------------------------------------------------------
@@ -50,9 +52,10 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
      * @param externalUserToPrincipal
      *         Converts the internal user to the {@link Principal} used in the system.
      */
-    public ExternalAuthenticator(final Function<InternalUser, P> externalUserToPrincipal)
+    public ExternalAuthenticator(final Function<InternalUser, P> externalUserToPrincipal, Iterable<AuthenticationEventListener> listeners)
     {
         this.externalUserToPrincipal = externalUserToPrincipal;
+        this.authenticationEventListeners = listeners;
     }
 
     // -------------------------------------------------------------------------
@@ -62,8 +65,20 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
     @Override
     public Optional<P> authenticate(final C credentials) throws AuthenticationException
     {
-        return doAuthenticate(credentials) //
-                .map(externalUserToPrincipal::apply);
+        try {
+            final Optional<P> principal = doAuthenticate(credentials) //
+                    .map(externalUserToPrincipal);
+            if (principal.isPresent()) {
+                authenticationEventListeners.forEach(AuthenticationEventListener::handleAuthenticationSuccess);
+            } else {
+                authenticationEventListeners.forEach(AuthenticationEventListener::handleAuthenticationDenied);
+            }
+            return principal;
+        } catch (AuthenticationException ex) {
+            // Call listener functions and propagate exception
+            authenticationEventListeners.forEach(AuthenticationEventListener::handleAuthenticationInvalid);
+            throw ex;
+        }
     }
 
     // -------------------------------------------------------------------------

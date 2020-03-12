@@ -47,7 +47,7 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
      * an external authentication provider.
      */
     public abstract <P extends Principal> AuthFilter<?, P> build(
-            Function<InternalUser, P> externalUserToPrincipal, Authorizer<P> authorizer);
+            Function<InternalUser, P> externalUserToPrincipal, Authorizer<P> authorizer, Iterable<AuthenticationEventListener> listeners);
 
 
     // -------------------------------------------------------------------------
@@ -78,7 +78,8 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
         @Override
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal,
-                final Authorizer<E> authorizer)
+                final Authorizer<E> authorizer,
+                final Iterable<AuthenticationEventListener> listeners)
         {
             if (signingKey == null)
             {
@@ -87,7 +88,7 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
             }
 
             return new OAuthCredentialAuthFilter.Builder<E>() //
-                    .setAuthenticator(new JwtAuthenticator<>(externalUserToPrincipal, signingKey))
+                    .setAuthenticator(new JwtAuthenticator<>(externalUserToPrincipal, signingKey, listeners))
                     .setAuthorizer(authorizer)
                     .setPrefix("Bearer")
                     .buildAuthFilter();
@@ -110,10 +111,11 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
         @Override
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal,
-                final Authorizer<E> authorizer)
+                final Authorizer<E> authorizer,
+                final Iterable<AuthenticationEventListener> listeners)
         {
             return new HeaderFieldsAuthFilter.Builder<E>() //
-                    .setAuthenticator(new HeaderFieldsAuthenticator<>(externalUserToPrincipal)) //
+                    .setAuthenticator(new HeaderFieldsAuthenticator<>(externalUserToPrincipal, listeners)) //
                     .setAuthorizer(authorizer) //
                     .buildAuthFilter();
         }
@@ -145,10 +147,11 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
         @Override
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal,
-                final Authorizer<E> authorizer)
+                final Authorizer<E> authorizer,
+                final Iterable<AuthenticationEventListener> listeners)
         {
             final ImmutableList<AuthFilter> authFilters = delegates.stream()
-                    .map(d -> d.build(externalUserToPrincipal, authorizer))
+                    .map(d -> d.build(externalUserToPrincipal, authorizer, listeners))
                     .collect(ImmutableList.toImmutableList());
 
             // This is "unchecked" because we may have different types of C (credentials)
@@ -183,10 +186,11 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
         @Override
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal,
-                final Authorizer<E> authorizer)
+                final Authorizer<E> authorizer,
+                final Iterable<AuthenticationEventListener> listeners)
         {
             return new DevAuthFilter.Builder<E>() //
-                    .setAuthenticator(new DevAuthenticator<>(externalUserToPrincipal, user)) //
+                    .setAuthenticator(new DevAuthenticator<>(externalUserToPrincipal, user, listeners)) //
                     .setAuthorizer(authorizer) //
                     .buildAuthFilter();
         }

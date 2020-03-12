@@ -5,6 +5,7 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
+import com.google.common.collect.ImmutableList;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.auth.*;
 import io.dropwizard.setup.Bootstrap;
@@ -12,6 +13,8 @@ import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 import java.security.Principal;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 import static java.util.Objects.*;
@@ -54,6 +57,9 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
     /** determines whether to allow dynamic, role based Authorization */
     private final boolean setupRolesAllowedDynamicFeature;
 
+    /** listeners for authentication events */
+    private final ImmutableList<AuthenticationEventListener> authenticationEventListeners;
+
     // -------------------------------------------------------------------------
     // CONSTRUCTION
     // -------------------------------------------------------------------------
@@ -65,9 +71,10 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
      * @param converter Converts the internal user to the {@link Principal} used in the system
      */
     public ExternallyAuthenticatedAuthBundle(final Class<P> principalClazz,
-            final Function<InternalUser, P> converter)
+            final Function<InternalUser, P> converter,
+            final AuthenticationEventListener... listeners)
     {
-        this(principalClazz, converter, new PermitAllAuthorizer<P>(), false);
+        this(principalClazz, converter, new PermitAllAuthorizer<P>(), false, listeners);
     }
 
     /**
@@ -79,9 +86,10 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
      */
     public ExternallyAuthenticatedAuthBundle(final Class<P> principalClazz,
             final Function<InternalUser, P> converter,
-            final Authorizer<P> authorizer)
+            final Authorizer<P> authorizer,
+            final AuthenticationEventListener... listeners)
     {
-        this(principalClazz, converter, authorizer, true);
+        this(principalClazz, converter, authorizer, true, listeners);
     }
 
     /**
@@ -96,12 +104,14 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
     private ExternallyAuthenticatedAuthBundle(final Class<P> principalClazz,
             final Function<InternalUser, P> converter,
             final Authorizer<P> authorizer,
-            final boolean setupRolesAllowedDynamicFeature)
+            final boolean setupRolesAllowedDynamicFeature,
+            final AuthenticationEventListener... listeners)
     {
         this.principalClazz = principalClazz;
         this.externalUserToPrincipal = requireNonNull(converter);
         this.authorizer = requireNonNull(authorizer);
         this.setupRolesAllowedDynamicFeature = setupRolesAllowedDynamicFeature;
+        this.authenticationEventListeners = ImmutableList.copyOf(listeners);
     }
 
     // -------------------------------------------------------------------------
@@ -117,7 +127,7 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
         final ExternallyAuthenticatedAuthFilterFactory authFilterFactory
                 = configuration.getExternallyAuthenticatedFilterFactory();
         final AuthFilter<?, P> authFilter = authFilterFactory.build(externalUserToPrincipal,
-                authorizer);
+                authorizer, authenticationEventListeners);
 
         environment.jersey().register(new AuthDynamicFeature(authFilter));
         // Support using @Auth to inject a custom Principal type into resources

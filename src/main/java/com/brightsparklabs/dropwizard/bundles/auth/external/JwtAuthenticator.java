@@ -67,9 +67,9 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
      * @param signingKey              signing key to use to validate tokens.
      */
     JwtAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
-            final String signingKey)
+            final String signingKey, Iterable<AuthenticationEventListener> listeners)
     {
-        super(externalUserToPrincipal);
+        super(externalUserToPrincipal, listeners);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(Decoders.BASE64.decode(signingKey));
         Key key = null;
         try

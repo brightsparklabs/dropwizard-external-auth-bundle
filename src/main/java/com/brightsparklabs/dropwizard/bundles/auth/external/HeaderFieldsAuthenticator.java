@@ -78,9 +78,9 @@ public class HeaderFieldsAuthenticator<P extends Principal>
      * @param externalUserToPrincipal
      *         Converts the internal user to the {@link Principal} used in the system.
      */
-    public HeaderFieldsAuthenticator(final Function<InternalUser, P> externalUserToPrincipal)
+    public HeaderFieldsAuthenticator(final Function<InternalUser, P> externalUserToPrincipal, final Iterable<AuthenticationEventListener> listeners)
     {
-        super(externalUserToPrincipal);
+        super(externalUserToPrincipal, listeners);
     }
 
     // -------------------------------------------------------------------------
