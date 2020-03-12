@@ -22,15 +22,14 @@ class JwtAuthenticatorTest extends Specification {
 
 
         when:
-        Optional<InternalUser> user = authenticator.doAuthenticate(jwt)
+        InternalUser user = authenticator.doAuthenticate(jwt)
 
         then:
-        def u  = user.get()
-        u.getRoles().contains("ADMIN")
-        u.getLastname() == "admin"
-        u.getFirstname() == "admin"
-        u.getUsername() == "admin"
-        u.getEmail().get() == "admin@email.com"
+        user.getRoles().contains("ADMIN")
+        user.getLastname() == "admin"
+        user.getFirstname() == "admin"
+        user.getUsername() == "admin"
+        user.getEmail().get() == "admin@email.com"
 
     }
 
@@ -45,15 +44,14 @@ class JwtAuthenticatorTest extends Specification {
 
 
         when:
-        Optional<InternalUser> user = authenticator.doAuthenticate(jwt)
+        InternalUser user = authenticator.doAuthenticate(jwt)
 
         then:
-        def u  = user.get()
-        u.getRoles().contains("TEST")
-        u.getLastname() == "email"
-        u.getFirstname() == "no"
-        u.getUsername() == "noemail"
-        !u.getEmail().isPresent()
+        user.getRoles().contains("TEST")
+        user.getLastname() == "email"
+        user.getFirstname() == "no"
+        user.getUsername() == "noemail"
+        !user.getEmail().isPresent()
 
     }
 }

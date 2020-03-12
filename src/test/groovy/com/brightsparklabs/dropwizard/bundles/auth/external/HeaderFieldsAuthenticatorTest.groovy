@@ -87,7 +87,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
 
         then:
         !result.isPresent()
-        1 * listener.onAuthenticationDenied()
+        1 * listener.onAuthenticationDenied(*_)
 
         where:
         username     | firstname | email  | lastname               | groups | roles
