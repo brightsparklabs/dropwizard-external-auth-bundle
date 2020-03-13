@@ -5,19 +5,22 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
-import com.google.common.collect.ImmutableList;
 import io.dropwizard.ConfiguredBundle;
-import io.dropwizard.auth.*;
+import io.dropwizard.auth.AuthDynamicFeature;
+import io.dropwizard.auth.AuthFilter;
+import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.auth.Authorizer;
+import io.dropwizard.auth.PermitAllAuthorizer;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 import java.security.Principal;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import static java.util.Objects.*;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Bundle to support authenticating users who have been already authenticated by an external
@@ -58,7 +61,7 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
     private final boolean setupRolesAllowedDynamicFeature;
 
     /** listeners for authentication events */
-    private final ImmutableList<AuthenticationEventListener> authenticationEventListeners;
+    private final List<AuthenticationEventListener> authenticationEventListeners;
 
     // -------------------------------------------------------------------------
     // CONSTRUCTION
@@ -111,7 +114,7 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
         this.externalUserToPrincipal = requireNonNull(converter);
         this.authorizer = requireNonNull(authorizer);
         this.setupRolesAllowedDynamicFeature = setupRolesAllowedDynamicFeature;
-        this.authenticationEventListeners = ImmutableList.copyOf(listeners);
+        this.authenticationEventListeners = Arrays.asList(listeners);
     }
 
     // -------------------------------------------------------------------------
@@ -143,6 +146,11 @@ public class ExternallyAuthenticatedAuthBundle<P extends Principal, T extends Ex
     // -------------------------------------------------------------------------
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
+
+    public void addAuthenticationEventListener(final AuthenticationEventListener listener) {
+        final AuthenticationEventListener safeListener = requireNonNull(listener);
+        this.authenticationEventListeners.add(safeListener);
+    }
 
     // -------------------------------------------------------------------------
     // PRIVATE METHODS
