@@ -1,11 +1,14 @@
 /*
- * Created by brightSPARK Labs
+ * Created by brightSPARK Labs in 2020.
  * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
  */
 
 package com.brightsparklabs.dropwizard.bundles.auth.external
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import io.dropwizard.auth.AuthenticationException
 import spock.lang.Specification
 
 import javax.ws.rs.core.MultivaluedHashMap
@@ -19,11 +22,13 @@ import java.util.function.Function
 class HeaderFieldsAuthenticatorTest extends Specification {
     def "authenticate success"() {
         given:
+        def listener = Mock(AuthenticationEventListener.class)
+
         def username = "${firstname}.${lastname}".toString()
         def email = "${username}@email.com".toString()
         def headers = createHeaders(username, firstname, lastname, email, groups, roles)
         def converter = Function.identity()
-        def instance = new HeaderFieldsAuthenticator(converter)
+        def instance = new HeaderFieldsAuthenticator(converter, [listener])
 
         when:
         def result = instance.authenticate(headers).get()
@@ -35,6 +40,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         result.email == Optional.of(email)
         result.groups.join(',') == expectedGroups
         result.roles.join(',') == expectedRoles
+        1 * listener.onAuthenticationSuccess(*_)
 
         where:
         firstname | lastname | groups              | roles                 | expectedGroups | expectedRoles
@@ -47,13 +53,15 @@ class HeaderFieldsAuthenticatorTest extends Specification {
 
     def "authenticate success no email"() {
         given:
+        def listener = Mock(AuthenticationEventListener.class)
+
         def firstname = "first"
         def lastname = "last"
         def username = "${firstname}.${lastname}".toString()
         def email = null
         def headers = createHeaders(username, firstname, lastname, email, null, null)
         def converter = Function.identity()
-        def instance = new HeaderFieldsAuthenticator(converter)
+        def instance = new HeaderFieldsAuthenticator(converter, [listener])
 
         when:
         def result = instance.authenticate(headers).get()
@@ -65,25 +73,44 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         result.email == Optional.ofNullable(email)
         result.groups.join(',') == ""
         result.roles.join(',') == ""
+        1 * listener.onAuthenticationSuccess(*_)
     }
 
     def "authenticate denied"() {
         given:
+        def listener = Mock(AuthenticationEventListener.class)
+
         def headers = createHeaders(username, firstname, lastname, email, groups, roles)
         def converter = Function.identity()
-        def instance = new HeaderFieldsAuthenticator(converter)
+        def instance = new HeaderFieldsAuthenticator(converter, [listener])
 
         when:
         def result = instance.authenticate(headers)
 
         then:
         !result.isPresent()
+        1 * listener.onAuthenticationDenied(*_)
 
         where:
         username     | firstname | email  | lastname               | groups | roles
         null         | "first"   | "last" | "first.last@email.com" | null   | null
         "first.last" | null      | "last" | "first.last@email.com" | null   | null
         "first.last" | "first"   | "last" | null                   | null   | null
+    }
+
+    def "authenticate invalid"() {
+        given:
+        def listener = Mock(AuthenticationEventListener.class)
+
+        def converter = Function.identity()
+        def instance = new HeaderFieldsAuthenticator(converter, [listener])
+
+        when:
+        instance.authenticate(null)
+
+        then:
+        thrown AuthenticationException
+        1 * listener.onAuthenticationError(*_)
     }
 
     // ------------------------------------------------------------------------------

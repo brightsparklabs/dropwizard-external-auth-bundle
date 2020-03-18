@@ -1,28 +1,25 @@
 /*
- * Created by brightSPARK Labs
+ * Created by brightSPARK Labs in 2020.
  * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
  */
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import io.dropwizard.auth.AuthenticationException;
+import java.security.Principal;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.Principal;
-import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Authenticator for use during development only.
  *
- * @param <P>
- *         Type of {@link Principal} to return for authenticated users.
- *
+ * @param <P> Type of {@link Principal} to return for authenticated users.
  * @author brightSPARK Labs
  */
-public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator<String, P>
-{
+public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator<String, P> {
     // -------------------------------------------------------------------------
     // CONSTANTS
     // -------------------------------------------------------------------------
@@ -49,15 +46,15 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
      * Creates a new authenticator which always returns the User from configuration. For use during
      * development only
      *
-     * @param externalUserToPrincipal
-     *         Converts the internal user to the {@link Principal} used in the system.
-     * @param user
-     *         user to return
+     * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
+     *     the system.
+     * @param user user to return
      */
-    DevAuthenticator(final Function<InternalUser, P> externalUserToPrincipal,
-            final InternalUser user)
-    {
-        super(externalUserToPrincipal);
+    DevAuthenticator(
+            final Function<InternalUser, P> externalUserToPrincipal,
+            final InternalUser user,
+            final Iterable<AuthenticationEventListener> listeners) {
+        super(externalUserToPrincipal, listeners);
         this.user = user;
     }
 
@@ -66,11 +63,10 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     @Override
-    public Optional<InternalUser> doAuthenticate(final String credentials)
-            throws AuthenticationException
-    {
+    public InternalUser doAuthenticate(final String credentials)
+            throws AuthenticationException, AuthenticationDeniedException {
         logger.warn("********** USING DEV MODE AUTHENTICATOR. DO NOT USE IN PRODUCTION **********");
-        return Optional.of(user);
+        return user;
     }
 
     // -------------------------------------------------------------------------

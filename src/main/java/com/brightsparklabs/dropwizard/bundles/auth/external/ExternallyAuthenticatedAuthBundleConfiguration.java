@@ -1,6 +1,8 @@
 /*
- * Created by brightSPARK Labs
+ * Created by brightSPARK Labs in 2020.
  * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
  */
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
@@ -10,8 +12,7 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
  *
  * @author brightSPARK Labs
  */
-public interface ExternallyAuthenticatedAuthBundleConfiguration
-{
+public interface ExternallyAuthenticatedAuthBundleConfiguration {
 
     // -------------------------------------------------------------------------
     // CONSTANTS
@@ -25,8 +26,6 @@ public interface ExternallyAuthenticatedAuthBundleConfiguration
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
-    /**
-     * @return configuration for trusting external authentication providers.
-     */
+    /** @return configuration for trusting external authentication providers. */
     ExternallyAuthenticatedAuthFilterFactory getExternallyAuthenticatedFilterFactory();
 }
