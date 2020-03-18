@@ -20,7 +20,6 @@ import io.dropwizard.setup.Environment;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
@@ -113,7 +112,8 @@ public class ExternallyAuthenticatedAuthBundle<
         this.externalUserToPrincipal = requireNonNull(converter);
         this.authorizer = requireNonNull(authorizer);
         this.setupRolesAllowedDynamicFeature = setupRolesAllowedDynamicFeature;
-        this.authenticationEventListeners = new ArrayList<AuthenticationEventListener>(Arrays.asList(listeners));
+        this.authenticationEventListeners =
+                new ArrayList<AuthenticationEventListener>(Arrays.asList(listeners));
     }
 
     // -------------------------------------------------------------------------
@@ -153,6 +153,16 @@ public class ExternallyAuthenticatedAuthBundle<
     public void addAuthenticationEventListener(final AuthenticationEventListener listener) {
         final AuthenticationEventListener safeListener = requireNonNull(listener);
         this.authenticationEventListeners.add(safeListener);
+    }
+
+    /**
+     * Removes an authentication listener
+     *
+     * @param listener the listener to remove
+     */
+    public void removeAuthenticationEventListener(final AuthenticationEventListener listener) {
+        final AuthenticationEventListener safeListener = requireNonNull(listener);
+        this.authenticationEventListeners.remove(safeListener);
     }
 
     /**
