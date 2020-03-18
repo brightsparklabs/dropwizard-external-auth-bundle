@@ -1,9 +1,17 @@
+/*
+ * Created by brightSPARK Labs in 2020.
+ * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
+ */
+
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import io.dropwizard.auth.Authenticator;
 
 /**
- * An exception thrown to indicate that an {@link Authenticator} has determined that the supplied credentials are invalid.
+ * An exception thrown to indicate that an {@link Authenticator} has determined that the supplied
+ * credentials are invalid.
  *
  * @author brightSPARK Labs
  */

@@ -1,6 +1,8 @@
 /*
- * Created by brightSPARK Labs
+ * Created by brightSPARK Labs in 2020.
  * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
  */
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
@@ -24,9 +26,7 @@ public interface AuthenticationEventListener {
         // Do nothing by default
     }
 
-    /**
-     * Listener function called on authentication failure - denied access
-     */
+    /** Listener function called on authentication failure - denied access */
     default void onAuthenticationDenied(AuthenticationDeniedException authDeniedException) {
         // Do nothing by default
     }

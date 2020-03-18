@@ -1,6 +1,8 @@
 /*
- * Created by brightSPARK Labs
+ * Created by brightSPARK Labs in 2020.
  * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
  */
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
@@ -15,21 +17,19 @@ import io.dropwizard.auth.Authorizer;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.jackson.Discoverable;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.util.function.Function;
+import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Factory for producing an {@link AuthFilter} which authenticates a user based on information
  * passed to it by an external authentication provider.
- * <p>
- * This will be created by Dropwizard + Jackson.
+ *
+ * <p>This will be created by Dropwizard + Jackson.
  */
 @JsonTypeInfo(use = Id.NAME, property = "method")
-public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discoverable
-{
+public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discoverable {
 
     // -------------------------------------------------------------------------
     // PUBLIC METHODS
@@ -40,15 +40,16 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
      * an external authentication provider.
      *
      * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
-     *                                the system.
-     * @param authorizer              The {@link Authorizer} to use.
-     * @param <P>                     The {@link Principal} the filter should return.
+     *     the system.
+     * @param authorizer The {@link Authorizer} to use.
+     * @param <P> The {@link Principal} the filter should return.
      * @return An {@link AuthFilter} which authenticates a user based on information passed to it by
-     * an external authentication provider.
+     *     an external authentication provider.
      */
     public abstract <P extends Principal> AuthFilter<?, P> build(
-            Function<InternalUser, P> externalUserToPrincipal, Authorizer<P> authorizer, Iterable<AuthenticationEventListener> listeners);
-
+            Function<InternalUser, P> externalUserToPrincipal,
+            Authorizer<P> authorizer,
+            Iterable<AuthenticationEventListener> listeners);
 
     // -------------------------------------------------------------------------
     // INNER CLASSES
@@ -60,16 +61,13 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
      */
     @JsonTypeName("jwt")
     public static class JwtAuthFilterFactory<P extends Principal>
-            extends ExternallyAuthenticatedAuthFilterFactory
-    {
+            extends ExternallyAuthenticatedAuthFilterFactory {
         // -------------------------------------------------------------------------
         // INSTANCE VARIABLES
         // -------------------------------------------------------------------------
 
         /** Public signing key used to sign the JWT */
-        @NotEmpty
-        @JsonProperty
-        private String signingKey;
+        @NotEmpty @JsonProperty private String signingKey;
 
         // -------------------------------------------------------------------------
         // IMPLEMENTATION: ExternallyAuthenticatedAuthFilterFactory
@@ -79,20 +77,18 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal,
                 final Authorizer<E> authorizer,
-                final Iterable<AuthenticationEventListener> listeners)
-        {
-            if (signingKey == null)
-            {
+                final Iterable<AuthenticationEventListener> listeners) {
+            if (signingKey == null) {
                 throw new IllegalArgumentException(
                         "signingKey has not been defined in authentication configuration");
             }
 
             return new OAuthCredentialAuthFilter.Builder<E>() //
-                    .setAuthenticator(new JwtAuthenticator<>(externalUserToPrincipal, signingKey, listeners))
+                    .setAuthenticator(
+                            new JwtAuthenticator<>(externalUserToPrincipal, signingKey, listeners))
                     .setAuthorizer(authorizer)
                     .setPrefix("Bearer")
                     .buildAuthFilter();
-
         }
     }
 
@@ -102,8 +98,7 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
      */
     @JsonTypeName("httpHeaders")
     public static class HttpHeadersAuthFilterFactory
-            extends ExternallyAuthenticatedAuthFilterFactory
-    {
+            extends ExternallyAuthenticatedAuthFilterFactory {
         // -------------------------------------------------------------------------
         // IMPLEMENTATION: ExternallyAuthenticatedAuthFilterFactory
         // -------------------------------------------------------------------------
@@ -112,10 +107,10 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal,
                 final Authorizer<E> authorizer,
-                final Iterable<AuthenticationEventListener> listeners)
-        {
+                final Iterable<AuthenticationEventListener> listeners) {
             return new HeaderFieldsAuthFilter.Builder<E>() //
-                    .setAuthenticator(new HeaderFieldsAuthenticator<>(externalUserToPrincipal, listeners)) //
+                    .setAuthenticator(
+                            new HeaderFieldsAuthenticator<>(externalUserToPrincipal, listeners)) //
                     .setAuthorizer(authorizer) //
                     .buildAuthFilter();
         }
@@ -127,16 +122,14 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
      */
     @JsonTypeName("chained")
     public static class ChainedAuthFilterFactory<P extends Principal>
-            extends ExternallyAuthenticatedAuthFilterFactory
-    {
+            extends ExternallyAuthenticatedAuthFilterFactory {
 
         // -------------------------------------------------------------------------
         // INSTANCE VARIABLES
         // -------------------------------------------------------------------------
 
         /** The AuthFilters that this will delegate to */
-        @NotEmpty
-        @JsonProperty
+        @NotEmpty @JsonProperty
         private ImmutableList<ExternallyAuthenticatedAuthFilterFactory> delegates;
 
         // -------------------------------------------------------------------------
@@ -148,11 +141,11 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal,
                 final Authorizer<E> authorizer,
-                final Iterable<AuthenticationEventListener> listeners)
-        {
-            final ImmutableList<AuthFilter> authFilters = delegates.stream()
-                    .map(d -> d.build(externalUserToPrincipal, authorizer, listeners))
-                    .collect(ImmutableList.toImmutableList());
+                final Iterable<AuthenticationEventListener> listeners) {
+            final ImmutableList<AuthFilter> authFilters =
+                    delegates.stream()
+                            .map(d -> d.build(externalUserToPrincipal, authorizer, listeners))
+                            .collect(ImmutableList.toImmutableList());
 
             // This is "unchecked" because we may have different types of C (credentials)
             // which is ok.
@@ -166,18 +159,13 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
      * used for development.
      */
     @JsonTypeName("dev")
-    public static class DevAuthFilterFactory extends ExternallyAuthenticatedAuthFilterFactory
-    {
+    public static class DevAuthFilterFactory extends ExternallyAuthenticatedAuthFilterFactory {
         // -------------------------------------------------------------------------
         // INSTANCE VARIABLES
         // -------------------------------------------------------------------------
 
-        /**
-         * User to return
-         */
-        @NotNull
-        @JsonProperty
-        private InternalUser user;
+        /** User to return */
+        @NotNull @JsonProperty private InternalUser user;
 
         // -------------------------------------------------------------------------
         // IMPLEMENTATION: ExternallyAuthenticatedAuthFilterFactory
@@ -187,10 +175,10 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
         public <E extends Principal> AuthFilter<?, E> build(
                 final Function<InternalUser, E> externalUserToPrincipal,
                 final Authorizer<E> authorizer,
-                final Iterable<AuthenticationEventListener> listeners)
-        {
+                final Iterable<AuthenticationEventListener> listeners) {
             return new DevAuthFilter.Builder<E>() //
-                    .setAuthenticator(new DevAuthenticator<>(externalUserToPrincipal, user, listeners)) //
+                    .setAuthenticator(
+                            new DevAuthenticator<>(externalUserToPrincipal, user, listeners)) //
                     .setAuthorizer(authorizer) //
                     .buildAuthFilter();
         }

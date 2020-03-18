@@ -1,3 +1,10 @@
+/*
+ * Created by brightSPARK Labs in 2020.
+ * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
+ */
+
 package com.brightsparklabs.dropwizard.bundles.auth.external
 
 import spock.lang.Specification

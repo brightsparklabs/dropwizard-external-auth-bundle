@@ -45,9 +45,9 @@ repositories {
 
 dependencies {
     def versions = [
-            dropwizard: '1.3.16',
-            immutables: '2.8.1',
-            jjwt      : '0.10.7',
+        dropwizard: '1.3.16',
+        immutables: '2.8.1',
+        jjwt      : '0.10.7',
     ]
     // These dependencies are found on compile classpath of this component and consumers.
     implementation(
@@ -60,19 +60,19 @@ dependencies {
             // Dropwizard
             "io.dropwizard:dropwizard-core:${versions.dropwizard}",
             "io.dropwizard:dropwizard-auth:${versions.dropwizard}",
-    )
+            )
 
     compileOnly(
             "org.immutables:value:${versions.immutables}",
             // We add this so that Immutables will annotate its generated classes with
             // @SuppressFBWarnings, and thus avoid Findbugs errors for those generated classes.
             'com.google.code.findbugs:annotations:3.0.1'
-    )
+            )
 
     runtimeOnly(
             "io.jsonwebtoken:jjwt-impl:${versions.jjwt}",
             "io.jsonwebtoken:jjwt-jackson:${versions.jjwt}",
-    )
+            )
 
     testImplementation(
             // Use the awesome Spock testing and specification framework even with Java
@@ -82,11 +82,11 @@ dependencies {
 
             // So that we can suppress some spotbugs reports
             'com.github.spotbugs:spotbugs-annotations:3.1.12',
-    )
+            )
 
     annotationProcessor(
             "org.immutables:value:${versions.immutables}",
-    )
+            )
 }
 
 // -----------------------------------------------------------------------------

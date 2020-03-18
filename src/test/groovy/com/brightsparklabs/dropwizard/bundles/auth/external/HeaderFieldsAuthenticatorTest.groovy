@@ -1,6 +1,8 @@
 /*
- * Created by brightSPARK Labs
+ * Created by brightSPARK Labs in 2020.
  * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
  */
 
 package com.brightsparklabs.dropwizard.bundles.auth.external
@@ -109,7 +111,6 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         then:
         thrown AuthenticationException
         1 * listener.onAuthenticationError(*_)
-
     }
 
     // ------------------------------------------------------------------------------
