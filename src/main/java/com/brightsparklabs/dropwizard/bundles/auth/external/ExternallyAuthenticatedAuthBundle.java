@@ -9,6 +9,7 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ImmutableList;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
@@ -70,6 +71,7 @@ public class ExternallyAuthenticatedAuthBundle<
      *
      * @param principalClazz Type of {@link Principal} to return for authenticated users
      * @param converter Converts the internal user to the {@link Principal} used in the system
+     * @param listeners Listeners to notify on authentication events.
      */
     public ExternallyAuthenticatedAuthBundle(
             final Class<P> principalClazz,
@@ -85,6 +87,7 @@ public class ExternallyAuthenticatedAuthBundle<
      * @param principalClazz Type of {@link Principal} to return for authenticated users
      * @param converter Converts the internal user to the {@link Principal} used in the system
      * @param authorizer the {@link Authorizer} to use.
+     * @param listeners Listeners to notify on authentication events.
      */
     public ExternallyAuthenticatedAuthBundle(
             final Class<P> principalClazz,
@@ -102,6 +105,7 @@ public class ExternallyAuthenticatedAuthBundle<
      * @param authorizer the {@link Authorizer} to use.
      * @param setupRolesAllowedDynamicFeature determines whether to allow dynamic, role based
      *     Authorization
+     * @param listeners Listeners to notify on authentication events.
      */
     private ExternallyAuthenticatedAuthBundle(
             final Class<P> principalClazz,
@@ -113,8 +117,7 @@ public class ExternallyAuthenticatedAuthBundle<
         this.externalUserToPrincipal = requireNonNull(converter);
         this.authorizer = requireNonNull(authorizer);
         this.setupRolesAllowedDynamicFeature = setupRolesAllowedDynamicFeature;
-        this.authenticationEventListeners =
-                new ArrayList<AuthenticationEventListener>(Arrays.asList(listeners));
+        this.authenticationEventListeners = new ArrayList<>(Arrays.asList(listeners));
     }
 
     // -------------------------------------------------------------------------
@@ -172,7 +175,7 @@ public class ExternallyAuthenticatedAuthBundle<
      * @return the authentication listeners
      */
     public List<AuthenticationEventListener> getAuthenticationEventListeners() {
-        return this.authenticationEventListeners;
+        return ImmutableList.copyOf(this.authenticationEventListeners);
     }
 
     // -------------------------------------------------------------------------
