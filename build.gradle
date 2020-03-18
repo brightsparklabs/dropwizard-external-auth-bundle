@@ -8,21 +8,14 @@
 // -----------------------------------------------------------------------------
 
 plugins {
+    // Apply the brightSPARK Labs plugin for standardisation
+    id 'com.brightsparklabs.gradle.baseline' version "0.1.0"
+
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
 
     // Apply the groovy plugin to also add support for Groovy (needed for Spock)
     id 'groovy'
-
-    // Apply the spotbugs plugin for code quality
-    id 'com.github.spotbugs' version '2.0.0'
-
-    // Apply the jacoco plugin for test coverage
-    id 'jacoco'
-
-    // Apply the annotation processing plugins
-    id "net.ltgt.apt" version "0.21"
-    id "net.ltgt.apt-idea" version "0.21"
 
     // Apply bintray plugin for publishing artifacts
     id "com.jfrog.bintray" version "1.8.4"
@@ -39,8 +32,6 @@ targetCompatibility = 1.8
 project.description  = 'Dropwizard bundle for trusting externally authenticated users'
 project.ext.url      = 'https://github.com/brightsparklabs/dropwizard-external-auth-bundle'
 project.ext.scm      = 'https://github.com/brightsparklabs/dropwizard-external-auth-bundle.git'
-project.group        = 'com.brightsparklabs'
-project.version      = 'git describe --always --dirty'.execute().text.trim()
 
 // -----------------------------------------------------------------------------
 // REPOSITORIES/DEPENDENCIES
@@ -54,9 +45,9 @@ repositories {
 
 dependencies {
     def versions = [
-            dropwizard       : '1.3.16',
-            immutablesVersion: '2.8.1',
-            jjwt             : '0.10.7',
+            dropwizard: '1.3.16',
+            immutables: '2.8.1',
+            jjwt      : '0.10.7',
     ]
     // These dependencies are found on compile classpath of this component and consumers.
     implementation(
@@ -72,7 +63,10 @@ dependencies {
     )
 
     compileOnly(
-            "org.immutables:value:${versions.immutablesVersion}",
+            "org.immutables:value:${versions.immutables}",
+            // We add this so that Immutables will annotate its generated classes with
+            // @SuppressFBWarnings, and thus avoid Findbugs errors for those generated classes.
+            'com.google.code.findbugs:annotations:3.0.1'
     )
 
     runtimeOnly(
@@ -91,7 +85,7 @@ dependencies {
     )
 
     annotationProcessor(
-            "org.immutables:value:${versions.immutablesVersion}",
+            "org.immutables:value:${versions.immutables}",
     )
 }
 
@@ -99,39 +93,7 @@ dependencies {
 // GENERATED CODE CONFIG
 // -----------------------------------------------------------------------------
 
-ext {
-    generatedSourcesDir = 'build/generated/source/apt/main'
-}
-
 dependencies {
-    // We add this so that Immutables will annotate its generated classes with
-    // @SuppressFBWarnings, and thus avoid Findbugs errors for those generated classes.
-    compileOnly group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.1'
-}
-
-sourceSets {
-    main.java.srcDirs += generatedSourcesDir
-}
-
-// -----------------------------------------------------------------------------
-// GENERATE CODE QUALTIY REPORT (via spotbugs)
-// -----------------------------------------------------------------------------
-
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
-}
-
-// -----------------------------------------------------------------------------
-// GENERATE CODE COVERAGE REPORT (via jacoco)
-// -----------------------------------------------------------------------------
-
-jacocoTestReport {
-    reports {
-        html.enabled = true
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -157,7 +119,6 @@ bintray {
         }
     }
 }
-
 
 // Include javadoc and sources (requirements for publishing to Maven Central)
 task javadocJar(type: Jar) {
