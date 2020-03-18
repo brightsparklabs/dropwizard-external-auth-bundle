@@ -18,6 +18,7 @@ import io.dropwizard.auth.PermitAllAuthorizer;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -58,7 +59,7 @@ public class ExternallyAuthenticatedAuthBundle<
     private final boolean setupRolesAllowedDynamicFeature;
 
     /** listeners for authentication events */
-    private final List<AuthenticationEventListener> authenticationEventListeners;
+    private final ArrayList<AuthenticationEventListener> authenticationEventListeners;
 
     // -------------------------------------------------------------------------
     // CONSTRUCTION
@@ -112,7 +113,7 @@ public class ExternallyAuthenticatedAuthBundle<
         this.externalUserToPrincipal = requireNonNull(converter);
         this.authorizer = requireNonNull(authorizer);
         this.setupRolesAllowedDynamicFeature = setupRolesAllowedDynamicFeature;
-        this.authenticationEventListeners = Arrays.asList(listeners);
+        this.authenticationEventListeners = new ArrayList<AuthenticationEventListener>(Arrays.asList(listeners));
     }
 
     // -------------------------------------------------------------------------
@@ -144,9 +145,23 @@ public class ExternallyAuthenticatedAuthBundle<
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
+    /**
+     * Add an authentication listener
+     *
+     * @param listener the listener to add
+     */
     public void addAuthenticationEventListener(final AuthenticationEventListener listener) {
         final AuthenticationEventListener safeListener = requireNonNull(listener);
         this.authenticationEventListeners.add(safeListener);
+    }
+
+    /**
+     * Get the authentication listeners
+     *
+     * @return the authentication listeners
+     */
+    public ArrayList<AuthenticationEventListener> getAuthenticationEventListeners() {
+        return this.authenticationEventListeners;
     }
 
     // -------------------------------------------------------------------------
