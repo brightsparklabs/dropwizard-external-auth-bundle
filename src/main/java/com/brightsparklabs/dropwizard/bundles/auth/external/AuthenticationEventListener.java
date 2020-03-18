@@ -20,18 +20,23 @@ public interface AuthenticationEventListener {
      *
      * @param authenticatedUser the successfully-authenticated user
      */
-    void onAuthenticationSuccess(InternalUser authenticatedUser);
+    default void onAuthenticationSuccess(InternalUser authenticatedUser) {
+        // Do nothing by default
+    }
 
     /**
      * Listener function called on authentication failure - denied access
      */
-    void onAuthenticationDenied(AuthenticationDeniedException authDeniedException);
+    default void onAuthenticationDenied(AuthenticationDeniedException authDeniedException) {
+        // Do nothing by default
+    }
 
     /**
      * Listener function called on authentication failure - invalid authentication request
      *
      * @param authException the authentication exception that was thrown
      */
-    void onAuthenticationError(AuthenticationException authException);
-
+    default void onAuthenticationError(AuthenticationException authException) {
+        // Do nothing by default
+    }
 }
