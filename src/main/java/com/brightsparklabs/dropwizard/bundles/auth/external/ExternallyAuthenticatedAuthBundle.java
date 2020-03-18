@@ -20,6 +20,7 @@ import io.dropwizard.setup.Environment;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
@@ -58,7 +59,7 @@ public class ExternallyAuthenticatedAuthBundle<
     private final boolean setupRolesAllowedDynamicFeature;
 
     /** listeners for authentication events */
-    private final ArrayList<AuthenticationEventListener> authenticationEventListeners;
+    private final List<AuthenticationEventListener> authenticationEventListeners;
 
     // -------------------------------------------------------------------------
     // CONSTRUCTION
@@ -170,7 +171,7 @@ public class ExternallyAuthenticatedAuthBundle<
      *
      * @return the authentication listeners
      */
-    public ArrayList<AuthenticationEventListener> getAuthenticationEventListeners() {
+    public List<AuthenticationEventListener> getAuthenticationEventListeners() {
         return this.authenticationEventListeners;
     }
 
