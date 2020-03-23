@@ -49,4 +49,3 @@ public class AddUserAuthToRequestFilter implements ContainerRequestFilter {
         }
     }
 }
-

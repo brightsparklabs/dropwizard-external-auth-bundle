@@ -26,7 +26,7 @@ public interface AuthenticationEventListener {
     }
 
     /**
-     *  Listener function called on authentication failure - denied access
+     * Listener function called on authentication failure - denied access
      *
      * @param authDeniedException the authentication exception that was thrown on access denied
      */
