@@ -42,6 +42,7 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
      * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
      *     the system.
      * @param authorizer The {@link Authorizer} to use.
+     * @param listeners The authentication event listeners
      * @param <P> The {@link Principal} the filter should return.
      * @return An {@link AuthFilter} which authenticates a user based on information passed to it by
      *     an external authentication provider.

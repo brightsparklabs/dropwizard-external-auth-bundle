@@ -25,6 +25,8 @@ import org.eclipse.jetty.server.UserIdentity;
  *
  * <p>By adding the authenticated user's username to the request's authentication, it can be logged
  * as part of auditing.
+ *
+ * @author brightSPARK Labs
  */
 @Provider
 public class AddUserAuthToRequestFilter implements ContainerRequestFilter {
