@@ -135,6 +135,9 @@ public class ExternallyAuthenticatedAuthBundle<
                 authFilterFactory.build(
                         externalUserToPrincipal, authorizer, authenticationEventListeners);
 
+        // Add the user authentication to the request
+        environment.jersey().register(AddUserAuthToRequestFilter.class);
+
         environment.jersey().register(new AuthDynamicFeature(authFilter));
         // Support using @Auth to inject a custom Principal type into resources
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(principalClazz));
