@@ -60,7 +60,6 @@ public class ExternallyAuthenticatedAuthBundle<
 
     /** listeners for authentication events */
     private final List<AuthenticationEventListener> authenticationEventListeners;
-
     // -------------------------------------------------------------------------
     // CONSTRUCTION
     // -------------------------------------------------------------------------
@@ -95,6 +94,45 @@ public class ExternallyAuthenticatedAuthBundle<
             final Authorizer<P> authorizer,
             final AuthenticationEventListener... listeners) {
         this(principalClazz, converter, authorizer, true, listeners);
+    }
+
+    /**
+     * Constructor for an AuthBundle that uses an {@link InternalUser} as principal. This will
+     * default to PermitAll authorization.
+     */
+    public ExternallyAuthenticatedAuthBundle(final AuthenticationEventListener... listeners) {
+        this(
+                InternalUser.class,
+                new IdentityPrincipalConverter(),
+                new PermitAllAuthorizer<InternalUser>(),
+                false,
+                listeners);
+    }
+
+    /**
+     * Constructor for an AuthBundle that uses an {@link InternalUser} as principal. This will use
+     * the provided Authorizer, and register {@link RolesAllowedDynamicFeature}
+     *
+     * @param authorizer the {@link Authorizer<InternalUser>} to use.
+     */
+    public ExternallyAuthenticatedAuthBundle(
+            final Authorizer<InternalUser> authorizer,
+            final AuthenticationEventListener... listeners) {
+        this(InternalUser.class, new IdentityPrincipalConverter(), authorizer, true, listeners);
+    }
+
+    private ExternallyAuthenticatedAuthBundle(
+            Class<InternalUser> internalUserClass,
+            IdentityPrincipalConverter identityPrincipalConverter,
+            Authorizer<InternalUser> internalUserPermitAllAuthorizer,
+            boolean b,
+            AuthenticationEventListener[] listeners) {
+        this(
+                (Class<P>) internalUserClass,
+                (PrincipalConverter<P>) identityPrincipalConverter,
+                (Authorizer<P>) internalUserPermitAllAuthorizer,
+                b,
+                listeners);
     }
 
     /**
