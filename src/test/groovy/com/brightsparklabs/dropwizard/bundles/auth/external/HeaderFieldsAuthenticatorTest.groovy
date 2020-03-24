@@ -12,7 +12,6 @@ import io.dropwizard.auth.AuthenticationException
 import spock.lang.Specification
 
 import javax.ws.rs.core.MultivaluedHashMap
-import java.util.function.Function
 
 /**
  * Units tests for {@link HeaderFieldsAuthenticator}.
@@ -20,6 +19,9 @@ import java.util.function.Function
  * @author brightSPARK Labs
  */
 class HeaderFieldsAuthenticatorTest extends Specification {
+
+    final PrincipalConverter principalConverter = new IdentityPrincipalConverter();
+
     def "authenticate success"() {
         given:
         def listener = Mock(AuthenticationEventListener.class)
@@ -27,8 +29,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         def username = "${firstname}.${lastname}".toString()
         def email = "${username}@email.com".toString()
         def headers = createHeaders(username, firstname, lastname, email, groups, roles)
-        def converter = Function.identity()
-        def instance = new HeaderFieldsAuthenticator(converter, [listener])
+        def instance = new HeaderFieldsAuthenticator(principalConverter, [listener])
 
         when:
         def result = instance.authenticate(headers).get()
@@ -60,8 +61,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         def username = "${firstname}.${lastname}".toString()
         def email = null
         def headers = createHeaders(username, firstname, lastname, email, null, null)
-        def converter = Function.identity()
-        def instance = new HeaderFieldsAuthenticator(converter, [listener])
+        def instance = new HeaderFieldsAuthenticator(principalConverter, [listener])
 
         when:
         def result = instance.authenticate(headers).get()
@@ -81,8 +81,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         def listener = Mock(AuthenticationEventListener.class)
 
         def headers = createHeaders(username, firstname, lastname, email, groups, roles)
-        def converter = Function.identity()
-        def instance = new HeaderFieldsAuthenticator(converter, [listener])
+        def instance = new HeaderFieldsAuthenticator(principalConverter, [listener])
 
         when:
         def result = instance.authenticate(headers)
@@ -102,8 +101,7 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         given:
         def listener = Mock(AuthenticationEventListener.class)
 
-        def converter = Function.identity()
-        def instance = new HeaderFieldsAuthenticator(converter, [listener])
+        def instance = new HeaderFieldsAuthenticator(principalConverter, [listener])
 
         when:
         instance.authenticate(null)
