@@ -12,7 +12,6 @@ import java.security.Principal;
 import java.util.Optional;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.ext.Provider;
 import org.eclipse.jetty.security.DefaultUserIdentity;
 import org.eclipse.jetty.security.UserAuthentication;
 import org.eclipse.jetty.server.HttpConnection;
@@ -26,22 +25,29 @@ import org.eclipse.jetty.server.UserIdentity;
  * <p>By adding the authenticated user's username to the request's authentication, it can be logged
  * as part of auditing.
  *
+ * @param <P> the type of principal retrieved from authentication
  * @author brightSPARK Labs
  */
-@Provider
-public class AddUserAuthToRequestFilter implements ContainerRequestFilter {
+public class AddUserAuthToRequestFilter<P extends Principal> implements ContainerRequestFilter {
+
+    private final PrincipalConverter<P> principalConverter;
+
+    public AddUserAuthToRequestFilter(final PrincipalConverter<P> principalConverter) {
+        this.principalConverter = principalConverter;
+    }
 
     @Override
     public void filter(ContainerRequestContext ctx) throws IOException {
         // Get the authorised user principal
         final Optional<Principal> userPrincipal =
                 Optional.ofNullable(ctx.getSecurityContext().getUserPrincipal());
-        if (userPrincipal.isPresent() && userPrincipal.get() instanceof InternalUser) {
+        if (userPrincipal.isPresent()) {
             final Request request =
                     HttpConnection.getCurrentConnection().getHttpChannel().getRequest();
             if (request != null) {
-                final InternalUser internalUser = (InternalUser) userPrincipal.get();
-                // Add the principal to the request to make it available for audit logging
+                // Extract the username and set as the user identity in the request
+                final InternalUser internalUser =
+                        this.principalConverter.convertToInternalUser((P) userPrincipal.get());
                 final Principal principal = internalUser::getUsername;
                 final UserIdentity userId = new DefaultUserIdentity(null, principal, null);
                 request.setAuthentication(new UserAuthentication(null, userId));

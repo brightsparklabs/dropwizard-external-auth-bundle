@@ -26,12 +26,24 @@ class ExternallyAuthenticatedAuthBundleTest extends Specification {
     /** Empty test class representing the authentication listener */
     class TestAuthenticationListener implements AuthenticationEventListener{}
 
+    final PrincipalConverter<TestUserPrincipal> principalConverter = new PrincipalConverter<TestUserPrincipal>() {
+        @Override
+        InternalUser convertToInternalUser(TestUserPrincipal principal) {
+            return null
+        }
+
+        @Override
+        TestUserPrincipal convertToPrincipal(InternalUser transformedType) {
+            return null
+        }
+    }
+
     def initialiseWithListeners() {
         given:
         TestAuthenticationListener listener = new TestAuthenticationListener();
 
         when: 'Initialising the bundle with listeners'
-        def bundle = new ExternallyAuthenticatedAuthBundle<>(TestUserPrincipal.class, { x -> x }, listener, listener, listener);
+        def bundle = new ExternallyAuthenticatedAuthBundle<>(TestUserPrincipal.class, principalConverter, listener, listener, listener);
 
         then: 'No exception should be thrown, and expect the right number of listeners'
         noExceptionThrown()
@@ -43,7 +55,7 @@ class ExternallyAuthenticatedAuthBundleTest extends Specification {
         TestAuthenticationListener listener = new TestAuthenticationListener();
 
         when: 'Adding listeners to the bundle'
-        def bundle = new ExternallyAuthenticatedAuthBundle<>(TestUserPrincipal.class, { x -> x }, listener, listener);
+        def bundle = new ExternallyAuthenticatedAuthBundle<>(TestUserPrincipal.class, principalConverter, listener, listener);
         bundle.addAuthenticationEventListener(listener)
         bundle.addAuthenticationEventListener(listener)
 

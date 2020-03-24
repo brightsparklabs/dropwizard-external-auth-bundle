@@ -13,7 +13,6 @@ import com.google.common.collect.ImmutableList;
 import io.dropwizard.auth.AuthenticationException;
 import java.security.Principal;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.StreamSupport;
 import javax.ws.rs.core.MultivaluedMap;
 import org.slf4j.Logger;
@@ -73,14 +72,14 @@ public class HeaderFieldsAuthenticator<P extends Principal>
     /**
      * Default constructor.
      *
-     * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
-     *     the system.
+     * @param principalConverter Converter between {@link InternalUser} and the {@link Principal}
+     *     used in the system.
      * @param listeners The authentication event listeners
      */
     public HeaderFieldsAuthenticator(
-            final Function<InternalUser, P> externalUserToPrincipal,
+            final PrincipalConverter<P> principalConverter,
             final Iterable<AuthenticationEventListener> listeners) {
-        super(externalUserToPrincipal, listeners);
+        super(principalConverter, listeners);
     }
 
     // -------------------------------------------------------------------------

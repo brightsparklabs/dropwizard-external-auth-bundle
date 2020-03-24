@@ -11,7 +11,6 @@ import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import java.security.Principal;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Authenticates a user based on information passed to it by an external authentication provider.
@@ -33,8 +32,8 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
     // INSTANCE VARIABLES
     // -------------------------------------------------------------------------
 
-    /** Converts an internal user to the principal used in the system */
-    private final Function<InternalUser, P> externalUserToPrincipal;
+    /** Converter between {@link InternalUser} and the {@link Principal} used in the system. */
+    private final PrincipalConverter<P> principalConverter;
 
     private final Iterable<AuthenticationEventListener> authenticationEventListeners;
 
@@ -46,14 +45,14 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
      * Creates a new authenticator which validates JWTs using the specified public signing key. This
      * should be the signing key of the Identity Provider who signed the JWT.
      *
-     * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
-     *     the system.
+     * @param principalConverter Converter between {@link InternalUser} and the {@link Principal}
+     *     used in the system.
      * @param listeners The authentication event listeners
      */
     public ExternalAuthenticator(
-            final Function<InternalUser, P> externalUserToPrincipal,
+            final PrincipalConverter<P> principalConverter,
             final Iterable<AuthenticationEventListener> listeners) {
-        this.externalUserToPrincipal = externalUserToPrincipal;
+        this.principalConverter = principalConverter;
         this.authenticationEventListeners = listeners;
     }
 
@@ -67,7 +66,7 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
             final InternalUser authenticatedInternalUser = doAuthenticate(credentials);
             authenticationEventListeners.forEach(
                     listener -> listener.onAuthenticationSuccess(authenticatedInternalUser));
-            return Optional.of(externalUserToPrincipal.apply(authenticatedInternalUser));
+            return Optional.of(principalConverter.convertToPrincipal(authenticatedInternalUser));
         } catch (AuthenticationDeniedException authDeniedException) {
             // Call listener functions and return an empty optional to indicate authentication was
             // denied
