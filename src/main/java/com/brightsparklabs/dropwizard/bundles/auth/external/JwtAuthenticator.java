@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,15 +65,15 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
      * Creates a new authenticator which validates JWTs using the specified public signing key. This
      * should be the signing key of the Identity Provider who signed the JWT.
      *
-     * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
-     *     the system.
+     * @param principalConverter Converter between {@link InternalUser} and the {@link Principal}
+     *     used in the system.
      * @param signingKey signing key to use to validate tokens.
      */
     JwtAuthenticator(
-            final Function<InternalUser, P> externalUserToPrincipal,
+            final PrincipalConverter<P> principalConverter,
             final String signingKey,
             final Iterable<AuthenticationEventListener> listeners) {
-        super(externalUserToPrincipal, listeners);
+        super(principalConverter, listeners);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(Decoders.BASE64.decode(signingKey));
         Key key = null;
         try {

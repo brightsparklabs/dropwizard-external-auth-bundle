@@ -9,7 +9,6 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import io.dropwizard.auth.AuthenticationException;
 import java.security.Principal;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,15 +45,15 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
      * Creates a new authenticator which always returns the User from configuration. For use during
      * development only
      *
-     * @param externalUserToPrincipal Converts the internal user to the {@link Principal} used in
-     *     the system.
+     * @param principalConverter Converter between {@link InternalUser} and the {@link Principal}
+     *     used in the system.
      * @param user user to return
      */
     DevAuthenticator(
-            final Function<InternalUser, P> externalUserToPrincipal,
+            final PrincipalConverter<P> principalConverter,
             final InternalUser user,
             final Iterable<AuthenticationEventListener> listeners) {
-        super(externalUserToPrincipal, listeners);
+        super(principalConverter, listeners);
         this.user = user;
     }
 

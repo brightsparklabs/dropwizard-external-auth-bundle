@@ -22,7 +22,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 /**
@@ -50,8 +49,8 @@ public class ExternallyAuthenticatedAuthBundle<
     /** Type of {@link Principal} to return for authenticated users */
     private final Class<P> principalClazz;
 
-    /** Converts the internal user to the {@link Principal} used in the system */
-    private final Function<InternalUser, P> externalUserToPrincipal;
+    /** Converter between {@link InternalUser} and the {@link Principal} used in the system. */
+    private final PrincipalConverter<P> principalConverter;
 
     /** Authorizer to use - will default to permit all */
     private final Authorizer<P> authorizer;
@@ -61,7 +60,6 @@ public class ExternallyAuthenticatedAuthBundle<
 
     /** listeners for authentication events */
     private final List<AuthenticationEventListener> authenticationEventListeners;
-
     // -------------------------------------------------------------------------
     // CONSTRUCTION
     // -------------------------------------------------------------------------
@@ -75,7 +73,7 @@ public class ExternallyAuthenticatedAuthBundle<
      */
     public ExternallyAuthenticatedAuthBundle(
             final Class<P> principalClazz,
-            final Function<InternalUser, P> converter,
+            final PrincipalConverter<P> converter,
             final AuthenticationEventListener... listeners) {
         this(principalClazz, converter, new PermitAllAuthorizer<P>(), false, listeners);
     }
@@ -85,23 +83,69 @@ public class ExternallyAuthenticatedAuthBundle<
      * RolesAllowedDynamicFeature}
      *
      * @param principalClazz Type of {@link Principal} to return for authenticated users
-     * @param converter Converts the internal user to the {@link Principal} used in the system
+     * @param converter Converter between {@link InternalUser} and the {@link Principal} used in the
+     *     system.
      * @param authorizer the {@link Authorizer} to use.
      * @param listeners Listeners to notify on authentication events.
      */
     public ExternallyAuthenticatedAuthBundle(
             final Class<P> principalClazz,
-            final Function<InternalUser, P> converter,
+            final PrincipalConverter<P> converter,
             final Authorizer<P> authorizer,
             final AuthenticationEventListener... listeners) {
         this(principalClazz, converter, authorizer, true, listeners);
     }
 
     /**
+     * Constructor for an AuthBundle that uses an {@link InternalUser} as principal. This will
+     * default to PermitAll authorization.
+     *
+     * @param listeners The authentication event listeners
+     */
+    public ExternallyAuthenticatedAuthBundle(final AuthenticationEventListener... listeners) {
+        this(new PermitAllAuthorizer<>(), false, listeners);
+    }
+
+    /**
+     * Constructor for an AuthBundle that uses an {@link InternalUser} as principal. This will use
+     * the provided Authorizer, and register {@link RolesAllowedDynamicFeature}
+     *
+     * @param authorizer the {@link Authorizer<InternalUser>} to use.
+     * @param listeners The authentication event listeners
+     */
+    public ExternallyAuthenticatedAuthBundle(
+            final Authorizer<InternalUser> authorizer,
+            final AuthenticationEventListener... listeners) {
+        this(authorizer, true, listeners);
+    }
+
+    /**
+     * Private Constructor for {@link ExternallyAuthenticatedAuthBundle} that use {@link
+     * InternalUser} as the principal.
+     *
+     * @param authorizer the {@link Authorizer} to use.
+     * @param setupRolesAllowedDynamicFeature determines whether to allow dynamic, role based
+     *     Authorization
+     * @param listeners The authentication event listeners
+     */
+    private ExternallyAuthenticatedAuthBundle(
+            final Authorizer<InternalUser> authorizer,
+            final boolean setupRolesAllowedDynamicFeature,
+            final AuthenticationEventListener... listeners) {
+        this(
+                (Class<P>) InternalUser.class,
+                (PrincipalConverter<P>) new IdentityPrincipalConverter(),
+                (Authorizer<P>) authorizer,
+                setupRolesAllowedDynamicFeature,
+                listeners);
+    }
+
+    /**
      * Private Constructor, for convenience.
      *
      * @param principalClazz Type of {@link Principal} to return for authenticated users
-     * @param converter Converts the internal user to the {@link Principal} used in the system
+     * @param converter Converter between {@link InternalUser} and the {@link Principal} used in the
+     *     system.
      * @param authorizer the {@link Authorizer} to use.
      * @param setupRolesAllowedDynamicFeature determines whether to allow dynamic, role based
      *     Authorization
@@ -109,12 +153,12 @@ public class ExternallyAuthenticatedAuthBundle<
      */
     private ExternallyAuthenticatedAuthBundle(
             final Class<P> principalClazz,
-            final Function<InternalUser, P> converter,
+            final PrincipalConverter<P> converter,
             final Authorizer<P> authorizer,
             final boolean setupRolesAllowedDynamicFeature,
             final AuthenticationEventListener... listeners) {
         this.principalClazz = principalClazz;
-        this.externalUserToPrincipal = requireNonNull(converter);
+        this.principalConverter = requireNonNull(converter);
         this.authorizer = requireNonNull(authorizer);
         this.setupRolesAllowedDynamicFeature = setupRolesAllowedDynamicFeature;
         this.authenticationEventListeners = new ArrayList<>(Arrays.asList(listeners));
@@ -133,7 +177,10 @@ public class ExternallyAuthenticatedAuthBundle<
                 configuration.getExternallyAuthenticatedFilterFactory();
         final AuthFilter<?, P> authFilter =
                 authFilterFactory.build(
-                        externalUserToPrincipal, authorizer, authenticationEventListeners);
+                        principalConverter, authorizer, authenticationEventListeners);
+
+        // Add the user authentication to the request
+        environment.jersey().register(new AddUserAuthToRequestFilter<>(principalConverter));
 
         environment.jersey().register(new AuthDynamicFeature(authFilter));
         // Support using @Auth to inject a custom Principal type into resources
