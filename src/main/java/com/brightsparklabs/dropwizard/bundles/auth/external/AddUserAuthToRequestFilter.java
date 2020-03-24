@@ -7,6 +7,8 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Optional;
@@ -33,7 +35,7 @@ public class AddUserAuthToRequestFilter<P extends Principal> implements Containe
     private final PrincipalConverter<P> principalConverter;
 
     public AddUserAuthToRequestFilter(final PrincipalConverter<P> principalConverter) {
-        this.principalConverter = principalConverter;
+        this.principalConverter = requireNonNull(principalConverter);
     }
 
     @Override
