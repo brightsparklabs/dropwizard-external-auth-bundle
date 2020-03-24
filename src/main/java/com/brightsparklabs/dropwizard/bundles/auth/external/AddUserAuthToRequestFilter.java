@@ -32,27 +32,37 @@ import org.eclipse.jetty.server.UserIdentity;
  */
 public class AddUserAuthToRequestFilter<P extends Principal> implements ContainerRequestFilter {
 
+    /** The principal converter to convert from Principal P to the InternalUser */
     private final PrincipalConverter<P> principalConverter;
 
+    /**
+     * Default constructor.
+     *
+     * @param principalConverter Converter between {@link InternalUser} and the {@link Principal}
+     *     used in the system.
+     */
     public AddUserAuthToRequestFilter(final PrincipalConverter<P> principalConverter) {
         this.principalConverter = requireNonNull(principalConverter);
     }
 
     @Override
-    public void filter(ContainerRequestContext ctx) throws IOException {
+    public void filter(final ContainerRequestContext ctx) throws IOException {
         // Get the authorised user principal
         final Optional<Principal> userPrincipal =
                 Optional.ofNullable(ctx.getSecurityContext().getUserPrincipal());
         if (userPrincipal.isPresent()) {
-            final Request request =
-                    HttpConnection.getCurrentConnection().getHttpChannel().getRequest();
-            if (request != null) {
+            final Optional<Request> request =
+                    Optional.ofNullable(
+                            HttpConnection.getCurrentConnection().getHttpChannel().getRequest());
+            if (request.isPresent()) {
                 // Extract the username and set as the user identity in the request
-                final InternalUser internalUser =
+                final Optional<InternalUser> maybeInternalUser =
                         this.principalConverter.convertToInternalUser((P) userPrincipal.get());
-                final Principal principal = internalUser::getUsername;
-                final UserIdentity userId = new DefaultUserIdentity(null, principal, null);
-                request.setAuthentication(new UserAuthentication(null, userId));
+                if (maybeInternalUser.isPresent()) {
+                    final Principal principal = maybeInternalUser.get()::getUsername;
+                    final UserIdentity userId = new DefaultUserIdentity(null, principal, null);
+                    request.get().setAuthentication(new UserAuthentication(null, userId));
+                }
             }
         }
     }

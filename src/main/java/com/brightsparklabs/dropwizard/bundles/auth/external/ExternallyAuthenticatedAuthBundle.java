@@ -131,7 +131,7 @@ public class ExternallyAuthenticatedAuthBundle<
     private ExternallyAuthenticatedAuthBundle(
             final Authorizer<InternalUser> authorizer,
             final boolean setupRolesAllowedDynamicFeature,
-            final AuthenticationEventListener[] listeners) {
+            final AuthenticationEventListener... listeners) {
         this(
                 (Class<P>) InternalUser.class,
                 (PrincipalConverter<P>) new IdentityPrincipalConverter(),

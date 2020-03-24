@@ -26,17 +26,7 @@ class ExternallyAuthenticatedAuthBundleTest extends Specification {
     /** Empty test class representing the authentication listener */
     class TestAuthenticationListener implements AuthenticationEventListener{}
 
-    final PrincipalConverter<TestUserPrincipal> principalConverter = new PrincipalConverter<TestUserPrincipal>() {
-        @Override
-        InternalUser convertToInternalUser(TestUserPrincipal principal) {
-            return null
-        }
-
-        @Override
-        TestUserPrincipal convertToPrincipal(InternalUser transformedType) {
-            return null
-        }
-    }
+    final PrincipalConverter<TestUserPrincipal> principalConverter = new IdentityPrincipalConverter()
 
     def initialiseWithListeners() {
         given:

@@ -7,14 +7,20 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
+import java.util.Optional;
+
+/**
+ * {@link PrincipalConverter} representing the identity function where the principal is an {@link
+ * InternalUser}
+ */
 public class IdentityPrincipalConverter implements PrincipalConverter<InternalUser> {
     @Override
-    public InternalUser convertToInternalUser(InternalUser principal) {
-        return principal;
+    public Optional<InternalUser> convertToInternalUser(final InternalUser principal) {
+        return Optional.of(principal);
     }
 
     @Override
-    public InternalUser convertToPrincipal(InternalUser transformedType) {
-        return transformedType;
+    public InternalUser convertToPrincipal(final InternalUser internalUser) {
+        return internalUser;
     }
 }
