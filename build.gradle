@@ -53,8 +53,6 @@ dependencies {
     implementation(
             // General
             'com.google.guava:guava:27.0.1-jre',
-            'com.fasterxml.jackson.module:jackson-module-jsonSchema:2.9.9',
-            'com.fasterxml.jackson.datatype:jackson-datatype-guava:2.4.0',
             "io.jsonwebtoken:jjwt-api:${versions.jjwt}",
 
             // Dropwizard
