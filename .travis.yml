@@ -8,8 +8,6 @@ language: java
 jdk:
   - openjdk8
 
-sudo: false
-
 notifications:
   email:
     on_success: never
