@@ -31,8 +31,36 @@ import org.hibernate.validator.constraints.NotEmpty;
 public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discoverable {
 
     // -------------------------------------------------------------------------
+    // CONSTANTS
+    // -------------------------------------------------------------------------
+
+    /**
+     * Default name of the field in the MDC (Mapped Diagnostic Context) that the authenticated
+     * user's username is stored against. Set to: {@value DEFAULT_MDC_USERNAME_FIELD}.
+     */
+    public static final String DEFAULT_MDC_USERNAME_FIELD = "req.username";
+
+    // -------------------------------------------------------------------------
+    // INSTANCE VARIABLES
+    // -------------------------------------------------------------------------
+
+    /**
+     * Field in the MDC (Mapped Diagnostic Context) that the authenticated user's username is stored
+     * against. Default: {@value DEFAULT_MDC_USERNAME_FIELD}.
+     */
+    @JsonProperty private String mdcUsernameField = DEFAULT_MDC_USERNAME_FIELD;
+
+    // -------------------------------------------------------------------------
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
+
+    /**
+     * @return The field in the MDC (Mapped Diagnostic Context) that the authenticated user's
+     *     username is stored against. Default: {@value DEFAULT_MDC_USERNAME_FIELD}.
+     */
+    String getMdcUsernameField() {
+        return mdcUsernameField;
+    }
 
     /**
      * Returns an {@link AuthFilter} which authenticates a user based on information passed to it by
@@ -83,7 +111,7 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
                         "signingKey has not been defined in authentication configuration");
             }
 
-            return new OAuthCredentialAuthFilter.Builder<E>() //
+            return new OAuthCredentialAuthFilter.Builder<E>()
                     .setAuthenticator(
                             new JwtAuthenticator<>(principalConverter, signingKey, listeners))
                     .setAuthorizer(authorizer)
@@ -108,10 +136,10 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
                 final PrincipalConverter<E> principalConverter,
                 final Authorizer<E> authorizer,
                 final Iterable<AuthenticationEventListener> listeners) {
-            return new HeaderFieldsAuthFilter.Builder<E>() //
+            return new HeaderFieldsAuthFilter.Builder<E>()
                     .setAuthenticator(
-                            new HeaderFieldsAuthenticator<>(principalConverter, listeners)) //
-                    .setAuthorizer(authorizer) //
+                            new HeaderFieldsAuthenticator<>(principalConverter, listeners))
+                    .setAuthorizer(authorizer)
                     .buildAuthFilter();
         }
     }
@@ -176,10 +204,9 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
                 final PrincipalConverter<E> principalConverter,
                 final Authorizer<E> authorizer,
                 final Iterable<AuthenticationEventListener> listeners) {
-            return new DevAuthFilter.Builder<E>() //
-                    .setAuthenticator(
-                            new DevAuthenticator<>(principalConverter, user, listeners)) //
-                    .setAuthorizer(authorizer) //
+            return new DevAuthFilter.Builder<E>()
+                    .setAuthenticator(new DevAuthenticator<>(principalConverter, user, listeners))
+                    .setAuthorizer(authorizer)
                     .buildAuthFilter();
         }
     }

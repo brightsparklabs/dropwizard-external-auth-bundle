@@ -110,7 +110,7 @@ public class ExternallyAuthenticatedAuthBundle<
      * Constructor for an AuthBundle that uses an {@link InternalUser} as principal. This will use
      * the provided Authorizer, and register {@link RolesAllowedDynamicFeature}
      *
-     * @param authorizer the {@link Authorizer<InternalUser>} to use.
+     * @param authorizer the {@link Authorizer} to use.
      * @param listeners The authentication event listeners
      */
     public ExternallyAuthenticatedAuthBundle(
@@ -180,7 +180,14 @@ public class ExternallyAuthenticatedAuthBundle<
                         principalConverter, authorizer, authenticationEventListeners);
 
         // Add the user authentication to the request
-        environment.jersey().register(new AddUserAuthToRequestFilter<>(principalConverter));
+        environment
+                .jersey()
+                .register(
+                        new AddUserAuthToRequestFilter<>(
+                                principalConverter,
+                                configuration
+                                        .getExternallyAuthenticatedFilterFactory()
+                                        .getMdcUsernameField()));
 
         environment.jersey().register(new AuthDynamicFeature(authFilter));
         // Support using @Auth to inject a custom Principal type into resources

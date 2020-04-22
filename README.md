@@ -73,14 +73,7 @@ Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
             public void initialize(Bootstrap<MyConfiguration> bootstrap)
             {
                 // create converter to map principal to what your app uses
-                final Function<InternalUser, User> converter = user -> ImmutableUser.builder()
-                        .username(user.getUsername())
-                        .firstname(user.getFirstname())
-                        .lastname(user.getLastname())
-                        .email(user.getEmail())
-                        .groups(user.getGroups())
-                        .roles(user.getRoles())
-                        .build();
+                final PrincipalConverter<User> converter = new PrincipalConverter<User> { ... }
 
                 // Optionally create an Authorizer
                 final Authorizer<User> authorizer = (p, r) -> p.getRoles().contains(r);
@@ -96,14 +89,35 @@ Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
     - If using `method: httpHeaders`, all mandatory headers are provided in request.
     - If using `method: jwt`, a valid JWT is in the header `Authorization: Bearer <jwt>`.
 
+# Request Logs
+
+The name of the `Principal` (i.e. `Principal#getName()`) will be automatically added to the
+request such that it will appear correctly in the Dropwizard request logs.
+
+# MDC
+
+The name of the `Principal` will be automatically added to the SLF4J MDC
+(Mapped Diagnostic Context). The default name for the MDC key is `req.username`. This can be
+changed by adding the following to the configuration:
+
+```
+# config.yml
+
+auth:
+  # Key in the MDC that the authenticated user's username is stored against.
+  mdcUsernameField: theUser
+```
+
 # Extending
 
-To create your own instances of ExternallyAuthenticatedAuthFilterFactory from configuration,
-ie instead of the bundled jwt/httpHeaders/dev, then add a file to
+To create your own instances of `ExternallyAuthenticatedAuthFilterFactory` from configuration
+(i.e. instead of the bundled `jwt`/`httpHeaders`/`dev`):
 
-.../resources/META-INF/services/com.brightsparklabs.dropwizard.bundles.auth.external.ExternallyAuthenticatedAuthFilterFactory
+1. Add a file to:
 
-and add the full class name of your subclass of ExternallyAuthenticatedAuthFilterFactory inside.
+        .../resources/META-INF/services/com.brightsparklabs.dropwizard.bundles.auth.external.ExternallyAuthenticatedAuthFilterFactory
+
+2. Add the full class name of your subclass of `ExternallyAuthenticatedAuthFilterFactory` inside.
 
 # Development
 
