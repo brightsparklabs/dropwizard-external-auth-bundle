@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -9,9 +9,11 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableSet;
+
+import org.immutables.value.Value;
+
 import java.security.Principal;
 import java.util.Optional;
-import org.immutables.value.Value;
 
 /**
  * An authenticated user as used internally by this bundle. Clients should translate this into the
@@ -34,29 +36,58 @@ public abstract class InternalUser implements Principal {
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
+    @Override
     @Value.Derived
     public String getName() {
         return getFirstname() + " " + getLastname();
     }
 
-    /** @return user's username (login). */
+    /**
+     * Returns the user's username (login).
+     *
+     * @return user's username (login).
+     */
     public abstract String getUsername();
 
-    /** @return user's firstname. */
+    /**
+     * Returns the user's firstname.
+     *
+     * @return user's firstname.
+     */
     public abstract String getFirstname();
 
-    /** @return user's lastname. */
+    /**
+     * Returns the user's lastname.
+     *
+     * @return user's lastname.
+     */
     public abstract String getLastname();
 
-    /** @return user's Optional email. */
+    /**
+     * Returns the user's Optional email.
+     *
+     * @return user's Optional email.
+     */
     public abstract Optional<String> getEmail();
 
-    /** @return user's group memberships. */
+    /**
+     * Returns the user's group memberships.
+     *
+     * @return user's group memberships.
+     */
     public abstract ImmutableSet<String> getGroups();
 
-    /** @return user's roles. */
+    /**
+     * Returns the user's roles.
+     *
+     * @return user's roles.
+     */
     public abstract ImmutableSet<String> getRoles();
 
-    /** @return URL for logging out the user. */
+    /**
+     * Returns the URL for logging out the user.
+     *
+     * @return URL for logging out the user.
+     */
     public abstract Optional<String> getLogoutUrl();
 }

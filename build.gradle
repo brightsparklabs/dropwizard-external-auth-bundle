@@ -7,9 +7,19 @@
 // PLUGINS
 // -----------------------------------------------------------------------------
 
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'io.github.gradle-nexus:publish-plugin:1.3.0'
+    }
+}
 plugins {
     // Apply the brightSPARK Labs plugin for standardisation
-    id 'com.brightsparklabs.gradle.baseline' version "0.1.0"
+    id 'com.brightsparklabs.gradle.baseline' version "4.0.0"
 
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
@@ -17,13 +27,27 @@ plugins {
     // Apply the groovy plugin to also add support for Groovy (needed for Spock)
     id 'groovy'
 
-    // Apply bintray plugin for publishing artifacts
-    id "com.jfrog.bintray" version "1.8.4"
-    id "maven-publish"
+    // -----------------------------------------------------------------------------
+    // PUBLISHING
+    // -----------------------------------------------------------------------------
+
+    id 'maven-publish'
+    // Maven Central requires artifacts to be signed.
+    id 'signing'
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+/*
+ * Maven Central requires artifacts to be released via Sonatype Nexus.
+ * The Nexus Publish Plugin can only be applied to the root project.
+ * Do not apply it if this project is being included as a subproject.
+ */
+def isRootProject = project.path == ':'
+if (isRootProject) {
+    apply plugin: 'io.github.gradle-nexus.publish-plugin'
+}
+
+sourceCompatibility = 17
+targetCompatibility = 17
 
 // -----------------------------------------------------------------------------
 // PROJECT IDENTIFICATION
@@ -31,28 +55,28 @@ targetCompatibility = 1.8
 
 project.description  = 'Dropwizard bundle for trusting externally authenticated users'
 project.ext.url      = 'https://github.com/brightsparklabs/dropwizard-external-auth-bundle'
-project.ext.scm      = 'https://github.com/brightsparklabs/dropwizard-external-auth-bundle.git'
-
+project.ext.scm      = 'scm:git@github.com:brightsparklabs/dropwizard-external-auth-bundle.git'
+project.group       = 'com.brightsparklabs'
+project.version     = 'git describe --always --dirty'.execute().text.trim()
 // -----------------------------------------------------------------------------
 // REPOSITORIES/DEPENDENCIES
 // -----------------------------------------------------------------------------
 
 repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    // Use mavenCentral for resolving dependencies.
+    mavenCentral()
 }
 
 dependencies {
     def versions = [
-        dropwizard: '1.3.16',
+        dropwizard: '4.0.0',
         immutables: '2.8.1',
-        jjwt      : '0.10.7',
+        jjwt      : '0.11.5',
     ]
     // These dependencies are found on compile classpath of this component and consumers.
     implementation(
             // General
-            'com.google.guava:guava:27.0.1-jre',
+            'com.google.guava:guava:31.1-jre',
             "io.jsonwebtoken:jjwt-api:${versions.jjwt}",
 
             // Dropwizard
@@ -74,12 +98,12 @@ dependencies {
 
     testImplementation(
             // Use the awesome Spock testing and specification framework even with Java
-            'org.codehaus.groovy:groovy-all:2.5.6',
-            'org.spockframework:spock-core:1.2-groovy-2.5',
-            'junit:junit:4.12',
+            //            'org.codehaus.groovy:groovy-all:3.0.17',
+            'org.spockframework:spock-core:2.4-M1-groovy-4.0',
+            'junit:junit:4.13.2',
 
             // So that we can suppress some spotbugs reports
-            'com.github.spotbugs:spotbugs-annotations:3.1.12',
+            'com.github.spotbugs:spotbugs-annotations:4.7.3',
             )
 
     annotationProcessor(
@@ -94,82 +118,126 @@ dependencies {
 dependencies {
 }
 
+
 // -----------------------------------------------------------------------------
-// PUBLISH ARTIFACTS (via bintray)
+// REPOSITORIES/DEPENDENCIES
 // -----------------------------------------------------------------------------
 
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    publications = ['Publication']
-    override = true
-    publish = true
-    pkg {
-        repo = 'maven'
-        name = project.name
-        userOrg = 'brightsparklabs'
-        licenses = ['MIT']
-        vcsUrl = project.ext.url
-        version {
-            name = project.version
-            vcsTag = project.version
-            released = new Date()
-        }
-    }
+repositories {
+    // Use mavenCentral for resolving dependencies.
+    mavenCentral()
 }
 
-// Include javadoc and sources (requirements for publishing to Maven Central)
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
+dependencies {
+    def versions = [
+        immutablesVersion: '2.9.3',
+    ]
+
+    // This dependency is exported to consumers, that is to say found on their compile classpath.
+    implementation(
+            // General
+            'com.google.guava:guava:23.0',
+            )
+
+    compileOnly(
+            "org.immutables:value:${versions.immutablesVersion}",
+            )
+
+    testImplementation(
+            // Use the awesome Spock testing and specification framework even with Java
+            'org.spockframework:spock-core:2.4-M1-groovy-4.0',
+            'junit:junit:4.13.2',
+            // Allow spock to mock non-interfaces
+            'net.bytebuddy:byte-buddy:1.14.4',
+            )
+
+    annotationProcessor(
+            "org.immutables:value:${versions.immutablesVersion}",
+            )
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+// -----------------------------------------------------------------------------
+// SETUP ARTIFACTS FOR PUBLISHING
+// -----------------------------------------------------------------------------
 
-def pomConfig = {
-    name project.name
-    packaging 'jar'
-    description project.description
-    url project.url
-
-    scm {
-        connection project.scm
-        developerConnection project.scm
-        url project.scm
-    }
-
-    licenses {
-        license {
-            name 'MIT License'
-            url 'http://www.opensource.org/licenses/mit-license.php'
-        }
-    }
-
-    developers {
-        developer {
-            id 'brightsparklabs'
-            name 'brightSPARK Labs'
-            email 'enquire@brightsparklabs.com'
-        }
-    }
+// Maven Central requires javadoc and sources.
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 publishing {
     publications {
-        Publication(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
+        mavenJava(MavenPublication) {
             groupId project.group
             artifactId project.name
             version project.version
-            pom.withXml {
-                def root = asNode()
-                root.children().last() + pomConfig
+            from components.java
+
+            // Maven Central requires specific POM attributes.
+            pom {
+                name = project.name
+                description = project.description
+                url = project.url
+
+                scm {
+                    connection = project.scm
+                    developerConnection = project.scm
+                    url = project.scm
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'http://www.opensource.org/licenses/mit-license.php'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'brightsparklabs'
+                        name = 'brightSPARK Labs'
+                        email = 'enquire@brightsparklabs.com'
+                    }
+                }
             }
         }
+    }
+}
+
+// Maven Central requires signed artifacts.
+signing {
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
+
+    // Only require signing when publishing (otherwise normal builds would need GPG keys).
+    required { gradle.taskGraph.hasTask("publishToSonatype") }
+}
+
+// -----------------------------------------------------------------------------
+// PUBLISH ARTIFACTS (via nexus)
+// -----------------------------------------------------------------------------
+
+if (isRootProject) {
+    nexusPublishing {
+        repositories {
+            // Credentials default to:
+            // - Property `sonatypeUsername` or ENV variable `ORG_GRADLE_PROJECT_sonatypeUsername`.
+            // - Property `sonatypePassword` or ENV variable ORG_GRADLE_PROJECT_sonatypePassword`.
+            sonatype()
+        }
+    }
+
+    task prePublishToMavenCentral {
+        group 'brightSPARK Labs - Maven Central Publishing'
+        description 'Stages the release on Sonatype ready for publishing to Maven Central.'
+        dependsOn 'publishToSonatype', 'closeSonatypeStagingRepository'
+    }
+    task publishToMavenCentral {
+        group 'brightSPARK Labs - Maven Central Publishing'
+        description 'Publishes the release to Maven Central.'
+        dependsOn 'publishToSonatype', 'closeAndReleaseSonatypeStagingRepository'
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -9,14 +9,16 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
+
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.SecurityContext;
+
 import java.io.IOException;
 import java.security.Principal;
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * An {@link AuthFilter} which supplies all the headers from the HTTP request to an {@link
