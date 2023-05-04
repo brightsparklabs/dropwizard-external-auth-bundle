@@ -121,9 +121,15 @@ To create your own instances of `ExternallyAuthenticatedAuthFilterFactory` from 
 
 - Publish new versions via:
 
-        export BINTRAY_USER=<user>
-        export BINTRAY_KEY=<key>
-        ./gradlew bintrayUpload
+```bash
+# Set env vars.
+export ORG_GRADLE_PROJECT_signingKey=<secrets.PGP_SIGNING_KEY>
+export ORG_GRADLE_PROJECT_signingPassword=<secrets.PGP_SIGNING_PASSWORD>
+export ORG_GRADLE_PROJECT_sonatypeUsername=<secrets.MAVEN_CENTRAL_USERNAME>
+export ORG_GRADLE_PROJECT_sonatypePassword=<secrets.MAVEN_CENTRAL_PASSWORD>
+# Run the publishToMavenCentral gradle task
+./gradlew publishToMavenCentral
+```
 
 ## Licenses
 

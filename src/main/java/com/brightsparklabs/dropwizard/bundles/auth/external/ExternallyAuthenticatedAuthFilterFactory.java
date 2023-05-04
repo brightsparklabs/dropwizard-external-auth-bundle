@@ -60,6 +60,9 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
     /**
      * Returns The field in the MDC (Mapped Diagnostic Context) that the authenticated user's
      * username is stored against. Default: {@value DEFAULT_MDC_USERNAME_FIELD}.
+     *
+     * @return The field in the MDC (Mapped Diagnostic Context) that the authenticated user's
+     *     username is stored against. Default: {@value DEFAULT_MDC_USERNAME_FIELD}.
      */
     String getMdcUsernameField() {
         return mdcUsernameField;
