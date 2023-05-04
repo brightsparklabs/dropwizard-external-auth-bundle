@@ -8,15 +8,13 @@ external identity provider.
 Currently focused around supporting [Keycloak
 Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
 
-# Usage
+## Usage
 
 - Include bundle. E.g. via `gradle`:
 
         # build.gradle
         repositories {
-            jcenter()
-            // ALTERNATIVELY: directly use the BSL repo on bintray
-            maven { url "https://dl.bintray.com/brightsparklabs/maven" }
+            mavenCentral()
         }
 
         dependencies {
@@ -108,7 +106,7 @@ auth:
   mdcUsernameField: theUser
 ```
 
-# Extending
+## Extending
 
 To create your own instances of `ExternallyAuthenticatedAuthFilterFactory` from configuration
 (i.e. instead of the bundled `jwt`/`httpHeaders`/`dev`):
@@ -119,7 +117,7 @@ To create your own instances of `ExternallyAuthenticatedAuthFilterFactory` from 
 
 2. Add the full class name of your subclass of `ExternallyAuthenticatedAuthFilterFactory` inside.
 
-# Development
+## Development
 
 - Publish new versions via:
 
@@ -127,6 +125,6 @@ To create your own instances of `ExternallyAuthenticatedAuthFilterFactory` from 
         export BINTRAY_KEY=<key>
         ./gradlew bintrayUpload
 
-# Licenses
+## Licenses
 
 Refer to the `LICENSE` file for details.
