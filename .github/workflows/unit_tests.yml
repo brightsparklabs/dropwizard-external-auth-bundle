@@ -1,0 +1,30 @@
+##
+# Created by brightSPARK Labs
+# www.brightsparklabs.com
+##
+
+name: Unit-Tests
+on: [push]
+
+jobs:
+  Unit-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Fetch all commits to ensure `git describe` returns correct version.
+          fetch-depth: 0
+      - name: Fix tag
+        # Workaround actions/checkout bug. See:
+        # - https://github.com/actions/checkout/issues/290
+        # - https://github.com/actions/checkout/issues/882
+        if: github.ref_type == 'tag'
+        run: git fetch -fv origin tag "${GITHUB_REF_NAME}"
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: "temurin"
+          cache: "gradle"
+      - name: Test with Gradle
+        run: ./gradlew build
