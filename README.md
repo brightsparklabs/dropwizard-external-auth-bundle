@@ -1,12 +1,15 @@
 # dropwizard-external-auth-bundle
 
 [![Build Status](https://github.com/brightsparklabs/dropwizard-external-auth-bundle/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/brightsparklabs/dropwizard-external-auth-bundle/actions/workflows/unit_tests.yml)
+[![Maven](https://img.shields.io/maven-central/v/com.brightsparklabs/dropwizard-external-auth-bundle)](https://search.maven.org/artifact/com.brightsparklabs/dropwizard-external-auth-bundle)
 
-A Dropwizard bundle which allows your service to trust authentication from an
-external identity provider.
+A Dropwizard bundle which allows your service to trust authentication from an external identity
+provider.
 
 Currently focused around supporting [Keycloak
 Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
+
+**NOTE: This plugin requires JDK 17 or above.**
 
 ## Usage
 

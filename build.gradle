@@ -7,14 +7,6 @@
 // PLUGINS
 // -----------------------------------------------------------------------------
 
-buildscript {
-    repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-}
-
 plugins {
     // Apply the brightSPARK Labs plugin for standardisation.
     id 'com.brightsparklabs.gradle.baseline' version "4.0.0"
