@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -37,7 +37,6 @@ class JwtAuthenticatorTest extends Specification {
         user.getFirstname() == "admin"
         user.getUsername() == "admin"
         user.getEmail().get() == "admin@email.com"
-
     }
 
     def "doAuthenticateNoEmail"() {
@@ -59,6 +58,5 @@ class JwtAuthenticatorTest extends Specification {
         user.getFirstname() == "no"
         user.getUsername() == "noemail"
         !user.getEmail().isPresent()
-
     }
 }

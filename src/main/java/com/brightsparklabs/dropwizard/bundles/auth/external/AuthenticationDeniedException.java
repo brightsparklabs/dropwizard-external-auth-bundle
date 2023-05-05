@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -17,14 +17,30 @@ import io.dropwizard.auth.Authenticator;
  */
 public class AuthenticationDeniedException extends Exception {
 
+    /**
+     * Constructs a new authentication denied exception with the specified detail message.
+     *
+     * @param message the detail message.
+     */
     public AuthenticationDeniedException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new authentication denied exception with the specified detail message and cause.
+     *
+     * @param message the detail message.
+     * @param cause the cause of the exception.
+     */
     public AuthenticationDeniedException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new authentication denied exception with the specified cause.
+     *
+     * @param cause the cause of the exception.
+     */
     public AuthenticationDeniedException(Throwable cause) {
         super(cause);
     }

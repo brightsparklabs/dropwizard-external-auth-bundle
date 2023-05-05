@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -7,7 +7,6 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import spock.lang.Specification
 
 import java.security.Principal
@@ -17,7 +16,6 @@ import java.security.Principal
  *
  * @author brightSPARK Labs
  */
-@SuppressFBWarnings("SE_NO_SERIALVERSIONID")
 class ExternallyAuthenticatedAuthBundleTest extends Specification {
 
     /** Empty test class representing the principal */

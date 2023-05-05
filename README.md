@@ -1,22 +1,23 @@
 # dropwizard-external-auth-bundle
 
-[ ![Download](https://api.bintray.com/packages/brightsparklabs/maven/dropwizard-external-auth-bundle/images/download.svg) ](https://bintray.com/brightsparklabs/maven/dropwizard-external-auth-bundle/_latestVersion)
+[![Build Status](https://github.com/brightsparklabs/dropwizard-external-auth-bundle/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/brightsparklabs/dropwizard-external-auth-bundle/actions/workflows/unit_tests.yml)
+[![Maven](https://img.shields.io/maven-central/v/com.brightsparklabs/dropwizard-external-auth-bundle)](https://search.maven.org/artifact/com.brightsparklabs/dropwizard-external-auth-bundle)
 
-A Dropwizard bundle which allows your service to trust authentication from an
-external identity provider.
+A Dropwizard bundle which allows your service to trust authentication from an external identity
+provider.
 
 Currently focused around supporting [Keycloak
 Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
 
-# Usage
+**NOTE: This plugin requires JDK 17 or above.**
+
+## Usage
 
 - Include bundle. E.g. via `gradle`:
 
         # build.gradle
         repositories {
-            jcenter()
-            // ALTERNATIVELY: directly use the BSL repo on bintray
-            maven { url "https://dl.bintray.com/brightsparklabs/maven" }
+            mavenCentral()
         }
 
         dependencies {
@@ -108,7 +109,7 @@ auth:
   mdcUsernameField: theUser
 ```
 
-# Extending
+## Extending
 
 To create your own instances of `ExternallyAuthenticatedAuthFilterFactory` from configuration
 (i.e. instead of the bundled `jwt`/`httpHeaders`/`dev`):
@@ -119,14 +120,20 @@ To create your own instances of `ExternallyAuthenticatedAuthFilterFactory` from 
 
 2. Add the full class name of your subclass of `ExternallyAuthenticatedAuthFilterFactory` inside.
 
-# Development
+## Development
 
 - Publish new versions via:
 
-        export BINTRAY_USER=<user>
-        export BINTRAY_KEY=<key>
-        ./gradlew bintrayUpload
+```bash
+# Set env vars.
+export ORG_GRADLE_PROJECT_signingKey=<secrets.PGP_SIGNING_KEY>
+export ORG_GRADLE_PROJECT_signingPassword=<secrets.PGP_SIGNING_PASSWORD>
+export ORG_GRADLE_PROJECT_sonatypeUsername=<secrets.MAVEN_CENTRAL_USERNAME>
+export ORG_GRADLE_PROJECT_sonatypePassword=<secrets.MAVEN_CENTRAL_PASSWORD>
+# Run the publishToMavenCentral gradle task
+./gradlew publishToMavenCentral
+```
 
-# Licenses
+## Licenses
 
 Refer to the `LICENSE` file for details.

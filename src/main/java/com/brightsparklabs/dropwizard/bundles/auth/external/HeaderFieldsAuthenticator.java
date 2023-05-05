@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -10,13 +10,17 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+
 import io.dropwizard.auth.AuthenticationException;
+
+import jakarta.ws.rs.core.MultivaluedMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.Principal;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
-import javax.ws.rs.core.MultivaluedMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Determines if a user is authenticated based on the presence/values in various header fields. This
