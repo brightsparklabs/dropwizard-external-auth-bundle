@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -7,11 +7,9 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.dropwizard.auth.AuthenticationException
+import jakarta.ws.rs.core.MultivaluedHashMap
 import spock.lang.Specification
-
-import javax.ws.rs.core.MultivaluedHashMap
 
 /**
  * Units tests for {@link HeaderFieldsAuthenticator}.
@@ -115,7 +113,6 @@ class HeaderFieldsAuthenticatorTest extends Specification {
     // FIXTURES
     // ------------------------------------------------------------------------------
 
-    @SuppressFBWarnings("SE_NO_SERIALVERSIONID")
     def createHeaders(username, firstname, lastname, email, groups, roles) {
         def headers = new MultivaluedHashMap<String, String>()
         headers.with {

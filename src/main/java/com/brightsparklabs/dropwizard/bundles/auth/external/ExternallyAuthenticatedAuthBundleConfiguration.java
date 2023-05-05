@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -26,6 +26,10 @@ public interface ExternallyAuthenticatedAuthBundleConfiguration {
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
-    /** @return configuration for trusting external authentication providers. */
+    /**
+     * Gets configuration for trusting external authentication providers.
+     *
+     * @return Factory for producing an AuthFilter which authenticates a user.
+     */
     ExternallyAuthenticatedAuthFilterFactory getExternallyAuthenticatedFilterFactory();
 }

@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -9,17 +9,20 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.collect.ImmutableList;
+
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authorizer;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.jackson.Discoverable;
-import java.security.Principal;
-import javax.validation.constraints.NotNull;
+
+import jakarta.validation.constraints.NotNull;
+
 import org.hibernate.validator.constraints.NotEmpty;
+
+import java.security.Principal;
 
 /**
  * Factory for producing an {@link AuthFilter} which authenticates a user based on information
@@ -27,7 +30,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  *
  * <p>This will be created by Dropwizard + Jackson.
  */
-@JsonTypeInfo(use = Id.NAME, property = "method")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discoverable {
 
     // -------------------------------------------------------------------------
@@ -55,6 +58,9 @@ public abstract class ExternallyAuthenticatedAuthFilterFactory implements Discov
     // -------------------------------------------------------------------------
 
     /**
+     * Returns The field in the MDC (Mapped Diagnostic Context) that the authenticated user's
+     * username is stored against. Default: {@value DEFAULT_MDC_USERNAME_FIELD}.
+     *
      * @return The field in the MDC (Mapped Diagnostic Context) that the authenticated user's
      *     username is stored against. Default: {@value DEFAULT_MDC_USERNAME_FIELD}.
      */

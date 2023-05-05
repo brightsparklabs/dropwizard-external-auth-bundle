@@ -1,5 +1,5 @@
 /*
- * Created by brightSPARK Labs in 2020.
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
  *
  * Refer to LICENSE at repository root for license details.
@@ -9,6 +9,7 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
+
 import java.security.Principal;
 import java.util.Optional;
 
@@ -85,6 +86,16 @@ public abstract class ExternalAuthenticator<C, P extends Principal> implements A
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
+    /**
+     * Authenticates a user based on the credentials provided.
+     *
+     * @param credentials The credentials used to authenticate the user.
+     * @throws AuthenticationException Exception to indicate that the Authenticator is unable to
+     *     check the validity of the given credentials.
+     * @throws AuthenticationDeniedException Exception to indicate that an Authenticator has
+     *     determined that the supplied credentials are invalid.
+     * @return Authenticated internal user object.
+     */
     public abstract InternalUser doAuthenticate(final C credentials)
             throws AuthenticationException, AuthenticationDeniedException;
 
