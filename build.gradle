@@ -84,7 +84,7 @@ dependencies {
             'org.spockframework:spock-core:2.4-M1-groovy-4.0',
             // Allow spock to mock non-interfaces
             'net.bytebuddy:byte-buddy:1.14.4',
-            'org.junit.jupiter:junit-jupiter-api:5.9.3',
+            'org.junit.jupiter:junit-jupiter-api:5.10.0',
             )
 
     annotationProcessor(
