@@ -13,11 +13,15 @@ import com.google.common.collect.ImmutableList;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authorizer;
 import io.dropwizard.auth.PermitAllAuthorizer;
 import io.dropwizard.core.ConfiguredBundle;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.ExceptionMapper;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,9 +180,10 @@ public class ExternallyAuthenticatedAuthBundle<
     public void run(final T configuration, final Environment environment) throws Exception {
         final ExternallyAuthenticatedAuthFilterFactory authFilterFactory =
                 configuration.getExternallyAuthenticatedFilterFactory();
-        final AuthFilter<?, P> authFilter =
-                authFilterFactory.build(
-                        principalConverter, authorizer, authenticationEventListeners);
+
+        // Handle authentication exceptions.
+        environment.jersey().register(new AuthenticationExceptionMapper());
+        environment.jersey().register(new AuthenticationDeniedExceptionMapper());
 
         // Add the user authentication to the request
         environment
@@ -190,8 +195,12 @@ public class ExternallyAuthenticatedAuthBundle<
                                         .getExternallyAuthenticatedFilterFactory()
                                         .getMdcUsernameField()));
 
+        final AuthFilter<?, P> authFilter =
+                authFilterFactory.build(
+                        principalConverter, authorizer, authenticationEventListeners);
         environment.jersey().register(new AuthDynamicFeature(authFilter));
-        // Support using @Auth to inject a custom Principal type into resources
+
+        // Support using @Auth to inject a custom Principal type into resources.
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(principalClazz));
 
         // Allow dynamic authorization.
@@ -236,4 +245,26 @@ public class ExternallyAuthenticatedAuthBundle<
     // -------------------------------------------------------------------------
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
+    // INNER CLASSES
+    // -------------------------------------------------------------------------
+
+    /** Maps the {@link AuthenticationException} to a {@link Status#UNAUTHORIZED}. */
+    private static class AuthenticationExceptionMapper
+            implements ExceptionMapper<AuthenticationException> {
+        @Override
+        public Response toResponse(final AuthenticationException exception) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+    }
+
+    /** Maps the {@link AuthenticationException} to a {@link Status#UNAUTHORIZED}. */
+    private static class AuthenticationDeniedExceptionMapper
+            implements ExceptionMapper<AuthenticationDeniedException> {
+        @Override
+        public Response toResponse(final AuthenticationDeniedException exception) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+    }
 }

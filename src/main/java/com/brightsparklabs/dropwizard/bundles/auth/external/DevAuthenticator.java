@@ -28,7 +28,7 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     /** Class logger */
-    private static Logger logger = LoggerFactory.getLogger(DevAuthenticator.class);
+    private static final Logger logger = LoggerFactory.getLogger(DevAuthenticator.class);
 
     // -------------------------------------------------------------------------
     // INSTANCE VARIABLES
