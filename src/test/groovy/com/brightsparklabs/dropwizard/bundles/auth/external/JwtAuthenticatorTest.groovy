@@ -7,8 +7,15 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external
 
+
 import com.google.common.collect.ImmutableSet
+import io.jsonwebtoken.Jwts
 import spock.lang.Specification
+import spock.lang.Unroll
+
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.PrivateKey
 
 /**
  * Unit tests for {@link JwtAuthenticator}.
@@ -18,6 +25,10 @@ import spock.lang.Specification
 class JwtAuthenticatorTest extends Specification {
 
     final PrincipalConverter principalConverter = new IdentityPrincipalConverter();
+
+    // -----------------------------------------------------------------------------
+    // TESTS
+    // -----------------------------------------------------------------------------
 
     def "DoAuthenticate"() {
         given:
@@ -76,5 +87,143 @@ class JwtAuthenticatorTest extends Specification {
         user.getFirstname() == "no"
         user.getUsername() == "noemail"
         !user.getEmail().isPresent()
+    }
+
+    @Unroll
+    def "testClaims #description"() {
+        given:
+        final KeyPair keyPair = createKeyPair()
+        final publicKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded())
+        def authenticator = new JwtAuthenticator<InternalUser>(principalConverter, publicKey, [])
+
+        final String jwt =
+                createJwt("test.user", "Test", "User", "test.user@test.test",
+                groups,
+                roles,
+                realmRoles,
+                clientRoles,
+                keyPair.getPrivate()
+                );
+
+        when:
+        InternalUser user = authenticator.doAuthenticate(jwt)
+
+        then:
+        user.name == "Test User"
+        user.firstname == "Test"
+        user.lastname == "User"
+        user.groups == ImmutableSet.copyOf(groups ?: [])
+
+        def allClientRoles = clientRoles?.values()?.flatten() ?: []
+        user.roles == ImmutableSet.builder()
+                .addAll(roles ?: [])
+                .addAll(realmRoles ?: [])
+                .addAll(allClientRoles).build()
+
+        // spotless:off
+        where:
+        description       | groups       | roles                             | realmRoles            | clientRoles
+        "wth groups"      | ["G1", "G2"] | null                              | null                  | null
+        "wth roles"       | null         | ["R1", "R2", "GR1", "GR2", "GR3"] | null                  | null
+        "wth realmRoles"  | null         | null                              | ["RR1", "RR2", "GR1"] | null
+        "wth clientRoles" | null         | null                              | null                  |
+                [
+                        client1: ["C1R1", "C1R2", "GR2", "COMMON_CLIENT"],
+                        client2: ["C2R1", "C2R2", "GR3", "COMMON_CLIENT"],
+                ] as Map<String, List<String>>;
+
+        "wth groups+roles+realmRoles+clientRoles" |
+                ["G1", "G2"]                |
+                ["R1", "R2", "GR1", "GR2", "GR3"] |
+                ["RR1", "RR2", "GR1"]               |
+                [
+                        client1: ["C1R1", "C1R2", "GR2", "COMMON_CLIENT"],
+                        client2: ["C2R1", "C2R2", "GR3", "COMMON_CLIENT"],
+                ] as Map<String, List<String>>;
+        // spotless:on
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // FIXTURES
+    // -----------------------------------------------------------------------------
+
+    /**
+     * @return A nre RSA 2048-bit key pair.
+     */
+    def createKeyPair() {
+        final KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA")
+        generator.initialize(2048)
+        return generator.generateKeyPair()
+    }
+
+    /**
+     * Returns a new JWT containing the supplied information and signed with the provided private key.
+     *
+     * @param username Username to include.
+     * @param firstname Firstname to include.
+     * @param lastname Last to include.
+     * @param email Email to include.
+     * @param groups Group memberships to include.
+     * @param roles Roles to include.
+     * @param realmRoles Realm roles (Keycloak) to include.
+     * @param clientRoles Client roles (Keycloak) to include.
+     * @param privateKey Private key to sign the JWT with.
+     * @return The newly created JWT.
+     */
+    String createJwt(String username,
+            String firstname, String lastname, String email, List<String> groups,
+            List<String> roles, List<String> realmRoles = [], Map<String,
+            List<String>> clientRoles = [:], PrivateKey privateKey) {
+
+        Map<String, Object> claims = [
+            (JwtAuthenticator.CLAIM_FIELD_USERNAME) : username,
+            (JwtAuthenticator.CLAIM_FIELD_FIRSTNAME): firstname,
+            (JwtAuthenticator.CLAIM_FIELD_LASTNAME) : lastname,
+            (JwtAuthenticator.CLAIM_FIELD_EMAIL)    : email,
+        ]
+
+        if (groups != null) {
+            claims[JwtAuthenticator.CLAIM_FIELD_GROUPS] = groups
+        }
+
+        if (roles != null) {
+            claims[JwtAuthenticator.CLAIM_FIELD_ROLES] = roles
+        }
+
+        if (realmRoles != null) {
+            claims[JwtAuthenticator.CLAIM_FIELD_REALM_ACCESS] = [roles: realmRoles]
+        }
+
+        if (clientRoles != null) {
+            /*
+             * Transforms:
+             *
+             *   [
+             *      client1: ["ROLE1", "ROLE2"],
+             *      client2: ["ROLE3", "ROLE4"],
+             *   ]
+             *
+             * Into:
+             *
+             *   [
+             *      client1:
+             *        roles: ["ROLE1", "ROLE2"],
+             *      client2:
+             *        roles: ["ROLE3", "ROLE4"],
+             *   ]
+             */
+            def reshapeClientRoles =
+                    clientRoles
+                    .collectEntries { entry -> [(entry.key): [roles: entry.value]] }
+            claims[JwtAuthenticator.CLAIM_FIELD_RESOURCE_ACCESS] = reshapeClientRoles
+        }
+
+
+        final String jwt = Jwts.builder()
+                .setClaims(claims)
+                .signWith(privateKey)
+                .compact()
+        return jwt
     }
 }

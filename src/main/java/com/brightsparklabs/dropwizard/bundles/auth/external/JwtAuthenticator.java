@@ -42,32 +42,32 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
      */
 
     /** Name of the claim containing the username of the user. */
-    private static final String CLAIM_FIELD_USERNAME = "preferred_username";
+    public static final String CLAIM_FIELD_USERNAME = "preferred_username";
 
     /** Name of the claim containing the firstname of the user. */
-    private static final String CLAIM_FIELD_FIRSTNAME = "given_name";
+    public static final String CLAIM_FIELD_FIRSTNAME = "given_name";
 
     /** Name of the claim containing the lastname of the user. */
-    private static final String CLAIM_FIELD_LASTNAME = "family_name";
+    public static final String CLAIM_FIELD_LASTNAME = "family_name";
 
     /** Name of the claim containing the email of the user. */
-    private static final String CLAIM_FIELD_EMAIL = "email";
+    public static final String CLAIM_FIELD_EMAIL = "email";
 
     /** Name of the claim containing the roles of the user. */
-    private static final String CLAIM_FIELD_ROLES = "roles";
+    public static final String CLAIM_FIELD_ROLES = "roles";
 
     /** Name of the claim containing the groups the user is a member of. */
-    private static final String CLAIM_FIELD_GROUPS = "groups";
+    public static final String CLAIM_FIELD_GROUPS = "groups";
 
     /*
      * The claim names below are specific to Keycloak. Included for backwards compatibility.
      */
 
     /** Name of the claim containing the realm roles of the user. */
-    private static final String CLAIM_FIELD_REALM_ACCESS = "realm_access";
+    public static final String CLAIM_FIELD_REALM_ACCESS = "realm_access";
 
     /** Name of the claim containing the client roles of the user. */
-    private static final String CLAIM_FIELD_RESOURCE_ACCESS = "resource_access";
+    public static final String CLAIM_FIELD_RESOURCE_ACCESS = "resource_access";
 
     // -------------------------------------------------------------------------
     // CLASS VARIABLES
