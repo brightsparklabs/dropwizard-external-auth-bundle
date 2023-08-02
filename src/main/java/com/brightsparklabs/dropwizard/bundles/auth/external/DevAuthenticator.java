@@ -8,11 +8,9 @@
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import io.dropwizard.auth.AuthenticationException;
-
+import java.security.Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.Principal;
 
 /**
  * Authenticator for use during development only.
@@ -30,7 +28,7 @@ public class DevAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     /** Class logger */
-    private static Logger logger = LoggerFactory.getLogger(DevAuthenticator.class);
+    private static final Logger logger = LoggerFactory.getLogger(DevAuthenticator.class);
 
     // -------------------------------------------------------------------------
     // INSTANCE VARIABLES

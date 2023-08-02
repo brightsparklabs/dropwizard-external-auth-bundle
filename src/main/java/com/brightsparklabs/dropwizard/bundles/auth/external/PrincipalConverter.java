@@ -8,11 +8,9 @@
 package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import jakarta.validation.constraints.NotNull;
-
-import org.eclipse.jetty.server.Authentication;
-
 import java.security.Principal;
 import java.util.Optional;
+import org.eclipse.jetty.server.Authentication;
 
 /**
  * Interface for converting between {@link InternalUser} and the {@link Principal} used in the

@@ -9,7 +9,6 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
-
 import java.security.Principal;
 import java.util.Optional;
 

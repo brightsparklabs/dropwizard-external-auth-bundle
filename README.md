@@ -6,8 +6,7 @@
 A Dropwizard bundle which allows your service to trust authentication from an external identity
 provider.
 
-Currently focused around supporting [Keycloak
-Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper).
+Currently focused around supporting [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy).
 
 **NOTE: This plugin requires JDK 17 or above.**
 
