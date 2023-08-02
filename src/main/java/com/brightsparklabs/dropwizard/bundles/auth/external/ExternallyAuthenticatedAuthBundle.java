@@ -10,7 +10,6 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
-
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -19,13 +18,11 @@ import io.dropwizard.auth.PermitAllAuthorizer;
 import io.dropwizard.core.ConfiguredBundle;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
-
-import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
-
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 /**
  * Bundle to support authenticating users who have been already authenticated by an external system.
@@ -63,6 +60,7 @@ public class ExternallyAuthenticatedAuthBundle<
 
     /** listeners for authentication events */
     private final List<AuthenticationEventListener> authenticationEventListeners;
+
     // -------------------------------------------------------------------------
     // CONSTRUCTION
     // -------------------------------------------------------------------------

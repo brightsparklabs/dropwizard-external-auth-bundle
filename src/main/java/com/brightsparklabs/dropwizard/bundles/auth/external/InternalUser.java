@@ -9,11 +9,9 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableSet;
-
-import org.immutables.value.Value;
-
 import java.security.Principal;
 import java.util.Optional;
+import org.immutables.value.Value;
 
 /**
  * An authenticated user as used internally by this bundle. Clients should translate this into the

@@ -11,18 +11,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.collect.ImmutableList;
-
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authorizer;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.jackson.Discoverable;
-
 import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
 import java.security.Principal;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Factory for producing an {@link AuthFilter} which authenticates a user based on information
