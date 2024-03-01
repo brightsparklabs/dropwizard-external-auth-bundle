@@ -81,7 +81,7 @@ dependencies {
     testImplementation(
             'org.apache.groovy:groovy-all:4.0.18',
             // Use the awesome Spock testing and specification framework even with Java
-            'org.spockframework:spock-core:2.4-M1-groovy-4.0',
+            'org.spockframework:spock-core:2.4-M2-groovy-4.0',
             // Allow spock to mock non-interfaces
             'net.bytebuddy:byte-buddy:1.14.11',
             'org.junit.jupiter:junit-jupiter-api:5.10.1',
