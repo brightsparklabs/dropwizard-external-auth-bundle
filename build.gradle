@@ -51,7 +51,7 @@ repositories {
 
 dependencies {
     def versions = [
-        dropwizard: '4.0.6',
+        dropwizard: '4.0.7',
         immutables: '2.10.1',
         jjwt      : '0.12.5',
     ]
