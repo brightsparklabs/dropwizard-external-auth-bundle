@@ -10,6 +10,13 @@ Currently focused around supporting [oauth2-proxy](https://github.com/oauth2-pro
 
 **NOTE: This plugin requires JDK 17 or above.**
 
+## Compatibility
+
+| Bundle Version | Dropwizard Version | Java Version | Notes
+| -------------- | ------------------ | ------------ | ---------
+| 2.x.y          | 3.x.y              | 17           | Dropwizard 3.0 [changed core dropwizard packages](https://www.dropwizard.io/en/stable/manual/upgrade-notes/upgrade-notes-3_0_x.html#dropwizard-package-structure-and-jpms). Dropwizard 4.0 [transitioned to Jakarta](https://www.dropwizard.io/en/stable/manual/upgrade-notes/upgrade-notes-4_0_x.html#transition-to-jakarta-ee).
+| 1.x.y          | 1.x.y              | 8            | Initial release
+
 ## Usage
 
 - Include bundle. E.g. via `gradle`:
@@ -89,12 +96,12 @@ Currently focused around supporting [oauth2-proxy](https://github.com/oauth2-pro
     - If using `method: httpHeaders`, all mandatory headers are provided in request.
     - If using `method: jwt`, a valid JWT is in the header `Authorization: Bearer <jwt>`.
 
-# Request Logs
+## Request Logs
 
 The name of the `Principal` (i.e. `Principal#getName()`) will be automatically added to the
 request such that it will appear correctly in the Dropwizard request logs.
 
-# MDC
+## MDC
 
 The name of the `Principal` will be automatically added to the SLF4J MDC
 (Mapped Diagnostic Context). The default name for the MDC key is `req.username`. This can be
