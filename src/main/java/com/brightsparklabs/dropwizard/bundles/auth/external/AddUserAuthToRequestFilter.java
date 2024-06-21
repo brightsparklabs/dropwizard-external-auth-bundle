@@ -13,17 +13,15 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
-
+import java.io.IOException;
+import java.security.Principal;
+import java.util.Optional;
 import org.eclipse.jetty.security.DefaultUserIdentity;
 import org.eclipse.jetty.security.UserAuthentication;
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.UserIdentity;
 import org.slf4j.MDC;
-
-import java.io.IOException;
-import java.security.Principal;
-import java.util.Optional;
 
 /**
  * A {@link ContainerRequestFilter} that adds the authenticated user's username to the request
