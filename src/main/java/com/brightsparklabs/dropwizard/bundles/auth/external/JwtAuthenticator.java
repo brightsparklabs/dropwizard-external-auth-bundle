@@ -15,9 +15,9 @@ import com.google.common.collect.Sets;
 import io.dropwizard.auth.AuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.Principal;
+import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.List;
 import java.util.Map;
@@ -101,13 +101,13 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
             final Iterable<AuthenticationEventListener> listeners) {
         super(principalConverter, listeners);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(Decoders.BASE64.decode(signingKey));
-        Key key = null;
+        PublicKey key = null;
         try {
             key = KeyFactory.getInstance("RSA").generatePublic(spec);
         } catch (Exception ex) {
             logger.error("Could not process public key", ex);
         }
-        jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
+        jwtParser = Jwts.parser().verifyWith(key).build();
     }
 
     // -------------------------------------------------------------------------
@@ -120,13 +120,13 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
         logger.info("Authenticating via JWT [{}] ...", jwt);
         final Jws<Claims> jws;
         try {
-            jws = jwtParser.parseClaimsJws(jwt);
+            jws = jwtParser.parseSignedClaims(jwt);
         } catch (JwtException ex) {
             logger.info("Authentication failed - JWT is invalid [{}]", ex.getMessage());
             throw new AuthenticationException(ex);
         }
 
-        final Claims claims = jws.getBody();
+        final Claims claims = jws.getPayload();
         logger.info("JWT contains: {}", claims);
 
         try {
