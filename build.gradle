@@ -70,7 +70,7 @@ dependencies {
             "org.immutables:value:${versions.immutables}",
             // We add this so that Immutables will annotate its generated classes with
             // @SuppressFBWarnings, and thus avoid Findbugs errors for those generated classes.
-            'com.google.code.findbugs:annotations:3.0.1'
+            'com.google.code.findbugs:annotations:3.0.1u2'
             )
 
     runtimeOnly(
