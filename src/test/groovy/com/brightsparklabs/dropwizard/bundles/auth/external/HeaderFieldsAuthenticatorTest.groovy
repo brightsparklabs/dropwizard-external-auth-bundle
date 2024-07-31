@@ -7,7 +7,6 @@
 
 package com.brightsparklabs.dropwizard.bundles.auth.external
 
-import io.dropwizard.auth.AuthenticationException
 import jakarta.ws.rs.core.MultivaluedHashMap
 import spock.lang.Specification
 
@@ -105,8 +104,8 @@ class HeaderFieldsAuthenticatorTest extends Specification {
         instance.authenticate(null)
 
         then:
-        thrown AuthenticationException
-        1 * listener.onAuthenticationError(*_)
+        thrown AuthenticationDeniedException
+        1 * listener.onAuthenticationDenied(*_)
     }
 
     // ------------------------------------------------------------------------------

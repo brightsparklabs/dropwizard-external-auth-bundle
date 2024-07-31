@@ -7,10 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 The changelog is applicable from version `2.0.0` onwards.
 
 ---
-
 ## [Unreleased] - YYYY-MM-DD
 
-[Unreleased]: https://github.com/brightsparklabs/appcli/compare/2.0.0...HEAD
+[Unreleased]: https://github.com/brightsparklabs/appcli/compare/2.1.0...HEAD
 
 ### Added
 
@@ -23,6 +22,18 @@ The changelog is applicable from version `2.0.0` onwards.
 ### Fixed
 
 ### Security
+
+---
+
+## [2.1.0] - 2024-07-31
+
+[2.1.0]: https://github.com/brightsparklabs/appcli/compare/2.0.0...2.1.0
+
+### Changed
+
+- TERA-1723: Replaced usages of the DropWizard `AuthenticationException` with 
+  `AuthenticationDeniedException` as the former should only be used for internal errors and not
+  for issues with invalid or missing credentials.
 
 ---
 
