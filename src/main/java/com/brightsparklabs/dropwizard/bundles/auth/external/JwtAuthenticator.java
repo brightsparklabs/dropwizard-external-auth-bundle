@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import io.dropwizard.auth.AuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import java.security.KeyFactory;
@@ -115,15 +114,14 @@ public class JwtAuthenticator<P extends Principal> extends ExternalAuthenticator
     // -------------------------------------------------------------------------
 
     @Override
-    public InternalUser doAuthenticate(final String jwt)
-            throws AuthenticationException, AuthenticationDeniedException {
+    public InternalUser doAuthenticate(final String jwt) throws AuthenticationDeniedException {
         logger.info("Authenticating via JWT [{}] ...", jwt);
         final Jws<Claims> jws;
         try {
             jws = jwtParser.parseSignedClaims(jwt);
         } catch (JwtException ex) {
             logger.info("Authentication failed - JWT is invalid [{}]", ex.getMessage());
-            throw new AuthenticationException(ex);
+            throw new AuthenticationDeniedException(ex);
         }
 
         final Claims claims = jws.getPayload();

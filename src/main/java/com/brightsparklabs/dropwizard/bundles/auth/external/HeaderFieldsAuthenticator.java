@@ -10,7 +10,6 @@ package com.brightsparklabs.dropwizard.bundles.auth.external;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import io.dropwizard.auth.AuthenticationException;
 import jakarta.ws.rs.core.MultivaluedMap;
 import java.security.Principal;
 import java.util.Optional;
@@ -88,10 +87,10 @@ public class HeaderFieldsAuthenticator<P extends Principal>
 
     @Override
     public InternalUser doAuthenticate(final MultivaluedMap<String, String> headers)
-            throws AuthenticationException, AuthenticationDeniedException {
+            throws AuthenticationDeniedException {
         logger.info("Authenticating via header fields ...");
         if (headers == null) {
-            throw new AuthenticationException("No header fields provided to authenticator");
+            throw new AuthenticationDeniedException("No header fields provided to authenticator");
         }
 
         // extract groups and roles
