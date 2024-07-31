@@ -16,6 +16,10 @@ The changelog is applicable from version `2.0.0` onwards.
 
 ### Changed
 
+- TERA-1723: Replaced usages of the DropWizard `AuthenticationException` with 
+  `AuthenticationDeniedException` as the former should only be used for internal errors and not
+  for issues with invalid or missing credentials.
+
 ### Deprecated
 
 ### Removed
