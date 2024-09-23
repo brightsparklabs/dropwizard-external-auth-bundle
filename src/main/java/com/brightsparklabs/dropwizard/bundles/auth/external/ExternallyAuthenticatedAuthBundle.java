@@ -110,7 +110,7 @@ public class ExternallyAuthenticatedAuthBundle<
      * Constructor for an AuthBundle that uses an {@link InternalUser} as principal. This will use
      * the provided Authorizer, and register {@link RolesAllowedDynamicFeature}
      *
-     * @param authorizer the {@link Authorizer<InternalUser>} to use.
+     * @param authorizer the {@link Authorizer} (type {@link InternalUser}) to use.
      * @param listeners The authentication event listeners
      */
     public ExternallyAuthenticatedAuthBundle(
