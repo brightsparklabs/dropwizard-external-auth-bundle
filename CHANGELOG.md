@@ -15,6 +15,8 @@ The changelog is applicable from version `2.0.0` onwards.
 
 ### Changed
 
+- RAD-233: Migrated Maven Central publishing from OSSRH to Central Portal using JReleaser.
+
 ### Deprecated
 
 ### Removed
