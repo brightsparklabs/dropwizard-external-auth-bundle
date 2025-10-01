@@ -67,7 +67,7 @@ dependencies {
     // These dependencies are found on compile classpath of this component and consumers.
     implementation(
             // General
-            'com.google.guava:guava:33.4.8-jre',
+            'com.google.guava:guava:33.5.0-jre',
             "io.jsonwebtoken:jjwt-api:${versions.jjwt}",
 
             // Dropwizard
